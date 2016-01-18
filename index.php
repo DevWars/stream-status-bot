@@ -90,79 +90,24 @@ if($linkcount != 2)
 }
 
 
-/* PROCESS AND USE DEVWARS DB AND TWITCH DATA */
-
-function next_devwars($current,$skip)
-{
-    $current_date = strftime("%-m/%-d",$current);                           // m/d
-    $current_date_year = strftime("%-m/%-d/%Y",$current);                   // m/d/y
-    $current_day = strftime("%A",$current);                                 // Monday - Sunday
-    $current_hour = strftime("%-H",$current);                               // 0-23
-    
-    $next_tuesday = strtotime("next Tuesday",$current);
-    $next_saturday = strtotime("next Saturday",$current);
-    
-    if($next_tuesday < $next_saturday)
-    {
-        
-        $day = "Tuesday";
-        $next_devwars = $next_tuesday;
-    }
-    else
-    {
-        $day = "Saturday";
-        $next_devwars = $next_saturday;
-    }
-    
-    $next_devwars_date = strftime("%-m/%-d",$next_devwars);           // m/d - next DevWars
-    $next_devwars_date_year = strftime("%-m/%-d/%Y",$next_devwars);   // m/d/y - next DevWars
-    
-    $is_game_day = (($current_day == "Tuesday" || $current_day == "Saturday") ? true : false);
-    
-    if($is_game_day && $current_hour < 12)
-    {
-        $is_game_day_before_game = true;
-        
-        // x < 12 (00:00-11:59) to account for possible delays
-        // not visible if without a delay (DEVWARS LIVE text & DevWars are longer than 2 hours)
-        $day = $current_day;
-        $date = $current_date." (Today)";
-    }
-    else
-    {
-        $is_game_day_before_game = false;
-        $date = $next_devwars_date;
-    }
-    
-    foreach($skip as $skipdate)
-    {
-        // next DevWars skipping - not game day and/or after 12
-        // or
-        // today's DevWars skipping - game day before 12
-        if(($next_devwars_date_year == $skipdate && !$is_game_day_before_game) || ($current_date_year == $skipdate && $is_game_day_before_game))
-        {
-            return next_devwars(strtotime($skipdate." 12:00"),$skip);
-            break;
-        }
-    }
-    return "**Next DevWars:**[](#linebreak) *".$day." ".$date." - 10:00 AM MST*";
-}
-
-$twitchdata = json_decode(file_get_contents("https://api.twitch.tv/kraken/streams/DevWars"));
+/* PROCESS AND USE DEVWARS AND TWITCH DATA */
 
 $descriptionparts = explode("[](#devwars)", $srsettingsoutput->description);
 
+$nextgame = json_decode(file_get_contents("http://devwars.tv/v1/game/nearestgame"))->timestamp;
+
+$twitchdata = json_decode(file_get_contents("https://api.twitch.tv/kraken/streams/DevWars"));
+
 if($twitchdata->stream != NULL)
 {
-    $descriptionparts[1] = "[● DEVWARS LIVE](http://www.twitch.tv/DevWars)";
+	$descriptionparts[1] = "[● DEVWARS LIVE](http://www.twitch.tv/DevWars)";
 }
 else
 {
-    date_default_timezone_set("America/Phoenix");
-    $skipdates = array("6/6/2015","6/9/2015","6/13/2015","6/16/2015","6/20/2015","6/23/2015");
-    $currenttime = time();
-    $descriptionparts[1] = next_devwars($currenttime,$skipdates);
+	date_default_timezone_set("UTC");
+	$descriptionparts[1] = "**Next DevWars:**[](#linebreak) *".date("l, F j - g:i A e",$nextgame/1000)."*";
 }
+
 $descriptionparts = implode("[](#devwars)", $descriptionparts);
 
 
@@ -184,6 +129,8 @@ curl_setopt($srsidebar, CURLOPT_POSTFIELDS, array(
                                                 "description"=>               $descriptionparts,
                                                 "exclude_banned_modqueue"=>   $srsettingsoutput->exclude_banned_modqueue,
                                                 "header-title"=>              $srsettingsoutput->header_hover_text,
+                                                "hide_ads"=>                  $srsettingsoutput->hide_ads,
+                                                "key_color"=>                 $srsettingsoutput->key_color,
                                                 "lang"=>                      $srsettingsoutput->language,
                                                 "link_type"=>                 $srsettingsoutput->content_options,
                                                 "name"=>                      $subreddit,
@@ -199,6 +146,7 @@ curl_setopt($srsidebar, CURLOPT_POSTFIELDS, array(
                                                 "submit_link_label"=>         $srsettingsoutput->submit_link_label,
                                                 "submit_text"=>               $srsettingsoutput->submit_text,
                                                 "submit_text_label"=>         $srsettingsoutput->submit_text_label,
+                                                "suggested_comment_sort"=>    $srsettingsoutput->suggested_comment_sort,
                                                 "title"=>                     $srsettingsoutput->title,
                                                 "type"=>                      $srsettingsoutput->subreddit_type,
                                                 "wiki_edit_age"=>             $srsettingsoutput->wiki_edit_age,
