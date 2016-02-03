@@ -94,7 +94,7 @@ if($linkcount != 2)
 
 $descriptionparts = explode("[](#devwars)", $srsettingsoutput->description);
 
-$nextgame = json_decode(file_get_contents("http://devwars.tv/v1/game/nearestgame"))
+$nextgame = json_decode(file_get_contents("http://devwars.tv/v1/game/nearestgame"));
 
 $twitchdata = json_decode(file_get_contents("https://api.twitch.tv/kraken/streams/DevWars"));
 
