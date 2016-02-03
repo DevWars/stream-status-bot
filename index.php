@@ -94,7 +94,7 @@ if($linkcount != 2)
 
 $descriptionparts = explode("[](#devwars)", $srsettingsoutput->description);
 
-$nextgame = json_decode(file_get_contents("http://devwars.tv/v1/game/nearestgame"));
+$nextgame = json_decode(file_get_contents("http://devwars.tv/v1/game/nearestgame"))->timestamp;
 
 $twitchdata = json_decode(file_get_contents("https://api.twitch.tv/kraken/streams/DevWars"));
 
@@ -102,10 +102,10 @@ if($twitchdata->stream != NULL)
 {
 	$descriptionparts[1] = "[● DEVWARS LIVE](http://www.twitch.tv/DevWars)";
 }
-else if($nextgame != NULL)
+else if($nextgame)
 {
 	date_default_timezone_set("UTC");
-	$descriptionparts[1] = "**Next DevWars:**[](#linebreak) *".date("l, F j - g:i A e",$nextgame->timestamp/1000)."*";
+	$descriptionparts[1] = "**Next DevWars:**[](#linebreak) *".date("l, F j - g:i A e",$nextgame/1000)."*";
 }
 else
 {
