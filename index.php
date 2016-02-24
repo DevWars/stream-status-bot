@@ -2,7 +2,7 @@
 /**
  * /r/DevWars reddit bot
  * Made by Daniel Peukert (http://danielpeukert.cz)
- * GitHub: https://github.com/dpeukert/devwars-subreddit-bot
+ * GitHub: https://github.com/DevWars/subreddit-bot
  * Licensed under GPL v3
  */
 
