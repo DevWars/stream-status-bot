@@ -12,28 +12,45 @@ $useragent = $subreddit.'_bot/1.0 by '.$username;
 
 function log_error($message, $quit = true)
 {
-	$slack = curl_init();
-	$slackcolor = ($quit ? 'danger' : 'warning');
-	curl_setopt($slack, CURLOPT_URL, $slackurl);
-	curl_setopt($slack, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($slack, CURLOPT_POST, TRUE);
-	curl_setopt($slack, CURLOPT_POSTFIELDS, array(
-                                                'payload'=>'{"attachments":[{"fallback":"'.$message.'","color":"'.$slackcolor.'","fields":[{"title":"'.$message.'"}]}]}'
-                                            ));
-	$slackoutput = json_decode(curl_exec($slack));
-	$slackerror = curl_errno($slack);
-	curl_close($slack);
-	if($slackerror)
+	global $slackurl;
+	global $emailto;
+	global $emailfrom;
+	$exitmessage = $message;
+	if($slackurl)
 	{
-	    log_error('When authenticating, there was a cURL error code: '.$slackerror);
+		$slack = curl_init();
+		$slackcolor = ($quit ? 'danger' : 'warning');
+		$slackoptions = array(
+			CURLOPT_URL => $slackurl,
+			CURLOPT_RETURNTRANSFER => 1,
+			CURLOPT_POST => true,
+			CURLOPT_POSTFIELDS => array(
+				'payload' => '{"attachments":[{"fallback":"'.$message.'","color":"'.$slackcolor.'","fields":[{"title":"'.$message.'"}]}]}'
+			)
+		);
+		curl_setopt_array($slack, $slackoptions);
+		$slackoutput = json_decode(curl_exec($slack));
+		$slackerror = curl_errno($slack);
+		curl_close($slack);
+		if($slackerror)
+		{
+			$exitmessage = 'Slack connection failed, cURL error code '.$slackerror.'<br>'.$exitmessage;
+		}
+	}
+	elseif($emailto || $emailfrom)
+	{
+		if(!mail($emailto, 'Bot error', $message, 'To: '.$emailto.'\r\nFrom: '.$emailfrom))
+		{
+			$exitmessage = 'Sending email failed<br>'.$exitmessage;
+		}
 	}
 	if($quit)
 	{
-		exit($message);
+		exit($exitmessage);
 	}
 	else
 	{
-		echo $message.'<br>';
+		echo $exitmessage.'<br>';
 	}
 }
 
