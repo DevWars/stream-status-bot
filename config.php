@@ -11,8 +11,4 @@ $slackurl =		'';
 // Email
 // $emailto =	'';
 // $emailfrom =	'';
-
-// Github
-$github_repo =	''; // e.g. DevWars/reddit-css
-$secret =		'';
 ?>
