@@ -85,7 +85,7 @@ $settingsoptions = array(
 	CURLOPT_HTTPHEADER => array(
 		'User-Agent: '.$useragent,
         'Authorization: bearer '.$token
-	));
+	)
 );
 curl_setopt_array($settings, $settingsoptions);
 $settingsoutput = json_decode(curl_exec($settings));
@@ -120,9 +120,9 @@ if($linkcount != 2)
 // PROCESSING AND USING DEVWARS AND TWITCH DATA
 $sidebarparts = explode('[](#devwars)', $settingsoutput->description);
 
-$nextgame = json_decode(file_get_contents('http://devwars.tv/v1/game/nearestgame'))->timestamp;
+$nextgame = json_decode(@file_get_contents('http://devwars.tv/v1/game/nearestgame'))->timestamp;
 
-$twitchdata = json_decode(file_get_contents('https://api.twitch.tv/kraken/streams/DevWars'));
+$twitchdata = json_decode(@file_get_contents('https://api.twitch.tv/kraken/streams/DevWars'));
 
 if($twitchdata->stream != NULL)
 {
