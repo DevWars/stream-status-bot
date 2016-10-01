@@ -1,17 +1,8 @@
 DevWars reddit bot
 ===========
 ## Instructions
-1. Create a credentials.php file according to the format below and change the subreddit in the ```index.php``` file if needed
-2. Set up a cron: ```*/10 * * * * php -f /path/to/index.php```
+1. Fill the credentials.php file
+2. Set up a cron: ```*/10 * * * * php -f /path/to/reddit-bot.php```
 
-## credentials.php file format
-    <?php
-    $username = "REDDIT_USERNAME";
-    $password = "REDDIT_PASSWORD";
-    $email = "EMAIL_FOR_MESSAGES";
-
-    $auth = "REDDIT_APP_ID:REDDIT_APP_SECRET";
-    ?>
-    
 ## License
 GPL v3

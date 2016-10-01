@@ -37,7 +37,7 @@ function log_error($message, $quit = true)
 			$exitmessage = 'Slack connection failed, cURL error code '.$slackerror.'<br>'.$exitmessage;
 		}
 	}
-	elseif($emailto || $emailfrom)
+	if($emailto || $emailfrom)
 	{
 		if(!mail($emailto, 'Bot error', $message, 'To: '.$emailto.'\r\nFrom: '.$emailfrom))
 		{
