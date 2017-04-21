@@ -122,9 +122,29 @@ $sidebarparts = explode('[](#devwars)', $settingsoutput->description);
 
 $nextgame = json_decode(@file_get_contents('http://devwars.tv/v1/game/nearestgame'))->timestamp;
 
-$twitchdata = json_decode(@file_get_contents('https://api.twitch.tv/kraken/streams/DevWars'));
+$twitch = curl_init();
+$twitchoptions = array(
+	CURLOPT_URL => 'https://api.twitch.tv/kraken/streams/77543873',
+	CURLOPT_RETURNTRANSFER => 1,
+	CURLOPT_HTTPHEADER => array(
+		'Accept: application/vnd.twitchtv.v5+json',
+		'Client-ID: '.$clientid
+	)
+);
+curl_setopt_array($twitch, $twitchoptions);
+$twitchoutput = json_decode(curl_exec($twitch));
+$twitcherror = curl_errno($twitch);
+curl_close($twitch);
+if($twitcherror)
+{
+    log_error('Getting stream status, cURL error code '.$settingserror);
+}
+if(!isset($twitchoutput->stream))
+{
+    log_error('Getting stream status failed');
+}
 
-if($twitchdata->stream != NULL)
+if($twitchoutput->stream != NULL)
 {
 	$sidebarparts[1] = '[● DEVWARS LIVE](http://www.twitch.tv/DevWars)';
 }
