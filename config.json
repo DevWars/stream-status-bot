@@ -1,0 +1,13 @@
+{
+	"reddit": {
+		"username": "",
+		"password": "",
+		"clientid": "",
+		"clientsecret": "",
+		"subreddit": ""
+	},
+	"twitch": {
+		"channel": "",
+		"clientid": ""
+	}
+}
