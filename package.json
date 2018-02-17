@@ -1,7 +1,7 @@
 {
 	"name": "devwars-reddit-bot",
 	"description": "reddit bot for /r/DevWars",
-	"version": "2.0.0",
+	"version": "2.0.2",
 	"homepage": "https://github.com/DevWars/reddit-bot",
 	"author": {
 		"name": "Daniel Peukert",
