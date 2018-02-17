@@ -10,6 +10,12 @@ reddit bot for /r/DevWars
 
 ## Changelog
 
+17\. 2. 2018 - 2.0.2 - fixed changelog formatting
+
+17\. 2. 2018 - 2.0.1 - forgot to update README
+
+17\. 2. 2018 - 2.0.0 - rewrite
+
 22\. 4. 2017 - 1.0.0 - initial version
 
 ## License
