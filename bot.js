@@ -44,7 +44,7 @@ r.getSubreddit(c.reddit.subreddit).getSettings().then(res => {
 	} else {
 		sidebar[1] = "**Next DevWars:**[](#linebreak) ";
 		if(devwars[0].timestamp) {
-			let d = new Date(devwars.timestamp);
+			let d = new Date(devwars[0].timestamp);
 			sidebar[1] += "*" + days[d.getUTCDay()] + ", " + months[d.getUTCMonth()] + " " + d.getUTCDate() + " - " + ((d.getUTCHours() % 12) < 10 ? "0" : "") + (d.getUTCHours() % 12) + ":" + (d.getUTCMinutes() < 10 ? "0" : "") + d.getUTCMinutes() + " " + (d.getUTCHours() - 12 < 0 ? "AM" : "PM") + " UTC*";
 		} else {
 			sidebar[1] += "*Unavailable*";
