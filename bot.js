@@ -36,14 +36,14 @@ r.getSubreddit(c.reddit.subreddit).getSettings().then(res => {
 				"Client-ID": c.twitch.clientid
 			})
 		}),
-		fetch(`https://devwars.tv/v1/game/nearestgame`)
+		fetch(`https://api.devwars.tv/game/upcoming`)
 	]);
 }).then((res) => Promise.all(res.map(processResponse))).then(([twitch, devwars]) => {
 	if(twitch.stream) {
 		sidebar[1] = "[● DEVWARS LIVE](https://www.twitch.tv/DevWars)";
 	} else {
 		sidebar[1] = "**Next DevWars:**[](#linebreak) ";
-		if(devwars.timestamp) {
+		if(devwars[0].timestamp) {
 			let d = new Date(devwars.timestamp);
 			sidebar[1] += "*" + days[d.getUTCDay()] + ", " + months[d.getUTCMonth()] + " " + d.getUTCDate() + " - " + ((d.getUTCHours() % 12) < 10 ? "0" : "") + (d.getUTCHours() % 12) + ":" + (d.getUTCMinutes() < 10 ? "0" : "") + d.getUTCMinutes() + " " + (d.getUTCHours() - 12 < 0 ? "AM" : "PM") + " UTC*";
 		} else {
