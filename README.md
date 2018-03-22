@@ -5,7 +5,7 @@ reddit bot for /r/DevWars
 
 ## Instructions
 1. `npm i`
-2. Fill the config.json file
+2. Fill in the `config.json` file
 3. Set up a cron: ```*/5 * * * * node /path/to/bot.js```
 
 ## Changelog
