@@ -1,7 +1,7 @@
 {
 	"name": "devwars-reddit-bot",
 	"description": "reddit bot for /r/DevWars",
-	"version": "2.0.2",
+	"version": "2.1.0",
 	"homepage": "https://github.com/DevWars/reddit-bot",
 	"author": {
 		"name": "Daniel Peukert",
@@ -24,7 +24,7 @@
 	"main": "bot.js",
 	"dependencies": {
 		"snoowrap": "^1.15.2",
-		"node-fetch": "^2.0.0"
+		"node-fetch": "^2.1.1"
 	},
 	"license": "GPL-3.0"
 }

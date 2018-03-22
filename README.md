@@ -10,6 +10,8 @@ reddit bot for /r/DevWars
 
 ## Changelog
 
+22\. 3. 2018 - 2.1.0 - upgraded to a new API version, updated dependencies
+
 17\. 2. 2018 - 2.0.2 - fixed changelog formatting
 
 17\. 2. 2018 - 2.0.1 - forgot to update README
