@@ -1,13 +1,9 @@
 {
 	"name": "devwars-reddit-bot",
 	"description": "reddit bot for /r/DevWars",
-	"version": "2.1.0",
+	"version": "2.1.1",
 	"homepage": "https://github.com/DevWars/reddit-bot",
-	"author": {
-		"name": "Daniel Peukert",
-		"email": "dan.peukert@gmail.com",
-		"url": "http://danielpeukert.cz"
-	},
+	"author": "Daniel Peukert <dan.peukert@gmail.com> (https://www.danielpeukert.cz)",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/DevWars/reddit-bot.git"
@@ -24,7 +20,7 @@
 	"main": "bot.js",
 	"dependencies": {
 		"snoowrap": "^1.15.2",
-		"node-fetch": "^2.1.1"
+		"node-fetch": "^2.1.2"
 	},
 	"license": "GPL-3.0"
 }
