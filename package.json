@@ -1,6 +1,6 @@
 {
 	"name": "devwars-reddit-bot",
-	"version": "2.1.1",
+	"version": "2.1.2",
 	"description": "reddit bot for /r/DevWars",
 	"keywords": ["devwars", "bot", "reddit", "subreddit", "twitch"],
 	"homepage": "https://github.com/DevWars/reddit-bot",
