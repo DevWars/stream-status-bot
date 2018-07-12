@@ -3,12 +3,16 @@ reddit bot for /r/DevWars
 
 [![NPM](https://nodei.co/npm/devwars-reddit-bot.png?compact=true)](https://www.npmjs.com/package/devwars-reddit-bot)
 
+When a new tag is created, the current state of this repo gets published to NPM using GitLab CI (https://gitlab.com/dpeukert/devwars-reddit-bot).
+
 ## Instructions
 1. `npm i`
 2. Fill in the `config.json` file
 3. Set up a cron: ```*/5 * * * * node /path/to/bot.js```
 
 ## Changelog
+
+12\. 7. 2018 - 2.1.2 - pinned dependencies
 
 20\. 6. 2018 - 2.1.1 - fixed a crash caused by no upcoming games, updated dependency
 
