@@ -6,7 +6,7 @@ Stream status bot for DevWars
 When a new tag is created, the current state of this repo gets published to NPM and made into a Docker image using GitLab CI (https://gitlab.com/dpeukert/devwars-stream-status-bot).
 
 ## Instructions
-Run a Docker image from [here](https://gitlab.com/dpeukert/devwars-stream-status-bot/container_registry).
+Run a Docker image from [here](https://gitlab.com/dpeukert/devwars-stream-status-bot/container_registry) with a config file mounted to `/node/config.json`.
 
 ## Changelog
 
