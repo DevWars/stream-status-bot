@@ -1,9 +1,9 @@
 {
-	"name": "devwars-reddit-bot",
-	"version": "2.1.2",
-	"description": "reddit bot for /r/DevWars",
-	"keywords": ["devwars", "bot", "reddit", "subreddit", "twitch"],
-	"homepage": "https://github.com/DevWars/reddit-bot",
+	"name": "devwars-stream-status-bot",
+	"version": "1.0.0",
+	"description": "A reddit and Discord stream status bot for DevWars",
+	"keywords": ["devwars", "bot", "reddit", "subreddit", "twitch", "discord"],
+	"homepage": "https://github.com/DevWars/stream-status-bot",
 	"author": {
 		"name": "Daniel Peukert",
 		"email": "dan.peukert@gmail.com",
@@ -11,16 +11,21 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/DevWars/reddit-bot"
+		"url": "https://github.com/DevWars/stream-status-bot"
 	},
 	"bugs": {
 		"email": "dan.peukert@gmail.com",
-		"url": "http://github.com/DevWars/reddit-bot/issues"
+		"url": "https://github.com/DevWars/stream-status-bot/issues"
 	},
 	"main": "./bot.js",
+	"scripts": {
+		"start": "node bot.js"
+	},
 	"dependencies": {
+		"node-fetch": "2.2.0",
 		"snoowrap": "1.15.2",
-		"node-fetch": "2.1.2"
+		"discord.js": "11.4.2",
+		"twitch-webhook": "1.2.4"
 	},
 	"license": "GPL-3.0"
 }

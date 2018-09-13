@@ -1,55 +1,124 @@
-const snoowrap = require("snoowrap");
-const fetch = require("node-fetch");
-const c = require("./config");
-const p = require("./package");
-
 const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-const r = new snoowrap({
-	userAgent: p.name + "/" + p.version + " by " + c.reddit.username,
-	username: c.reddit.username,
-	password: c.reddit.password,
-	clientId: c.reddit.clientid,
-	clientSecret: c.reddit.clientsecret
-});
+const fetch = require("node-fetch");
+const snoowrap = require("snoowrap");
+const djs = require('discord.js');
 
-let sidebar;
+const conf = require('./config.json');
+
+const p = require("./package");
+const c = new djs.Client();
+const t = new (require('twitch-webhook'))({
+	"client_id": conf.twitch.clientId,
+	"callback": conf.twitch.callback,
+	"secret": conf.twitch.secret,
+	"listen": {
+		"port": conf.twitch.port
+	}
+});
+const r = new snoowrap({
+	userAgent: p.name + "/" + p.version + " by " + conf.reddit.username,
+	username: conf.reddit.username,
+	password: conf.reddit.password,
+	clientId: conf.reddit.clientId,
+	clientSecret: conf.reddit.clientSecret
+});
 
 let processResponse = res => {
 	return new Promise((resolve, reject) => {
-		if(!res.ok) reject(response.statusText);
-		else {
-			res.json().then(resolve).catch(reject);
-		}
+		if(!res.ok) reject(`${res.status}: ${res.statusText}`);
+		else res.json().then(resolve).catch(reject);
 	});
 };
 
-r.getSubreddit(c.reddit.subreddit).getSettings().then(res => {
-	sidebar = res.description.split("[](#" + c.reddit.subreddit + ")");
-	if(sidebar.length != 3) throw new Error("Sidebar tag mismatch");
+let postInDiscordChannels = (twitchUser, twitchStream) => {
+	if(conf.map[twitchUser.id].discord) {
+		for (let channelId of conf.map[twitchUser.id].discord) {
+			let channel = c.channels.get(channelId);
+			if(!channel) continue;
 
-	return Promise.all([
-		fetch(`https://api.twitch.tv/kraken/streams/${c.twitch.channel}`, {
-			headers: new fetch.Headers({
-				"Accept": "application/vnd.twitchtv.v5+json",
-				"Client-ID": c.twitch.clientid
-			})
-		}),
-		fetch(`https://api.devwars.tv/game/upcoming`)
-	]);
-}).then((res) => Promise.all(res.map(processResponse))).then(([twitch, devwars]) => {
-	if(twitch.stream) {
-		sidebar[1] = "[● DEVWARS LIVE](https://www.twitch.tv/DevWars)";
-	} else {
-		sidebar[1] = "**Next DevWars:**[](#linebreak) ";
-		if(devwars.length > 0 && devwars[0].timestamp) {
-			let d = new Date(devwars[0].timestamp);
-			sidebar[1] += "*" + days[d.getUTCDay()] + ", " + months[d.getUTCMonth()] + " " + d.getUTCDate() + " - " + ((d.getUTCHours() % 12) < 10 ? "0" : "") + (d.getUTCHours() % 12) + ":" + (d.getUTCMinutes() < 10 ? "0" : "") + d.getUTCMinutes() + " " + (d.getUTCHours() - 12 < 0 ? "AM" : "PM") + " UTC*";
-		} else {
-			sidebar[1] += "*Unavailable*";
+			const embed = new djs.RichEmbed()
+			.attachFile("./twitch.png")
+			.setAuthor(`${twitchUser.display_name} is now streaming!`, twitchUser.profile_image_url)
+			.setTitle(twitchStream.title)
+			.setURL(`https://www.twitch.tv/${twitchUser.login}`)
+			.setImage(twitchStream.thumbnail_url.replace("{width}", 480).replace("{height}", 270))
+			.setFooter("Twitch", "attachment://twitch.png")
+			.setTimestamp(new Date(twitchStream.started_at))
+			.setColor(6570404);
+
+			channel.send(embed).then().catch(err => {
+				console.error(`Unable to send a message to a Discord channel with ID ${channelId}:`, err);
+			});
 		}
 	}
+};
 
-	r.getSubreddit("DevWars").editSettings({"description": sidebar.join("[](#" + c.reddit.subreddit + ")")});
-}).catch(console.error);
+let updateSubredditHeaders = (twitchUser, isStreamOnline) => {
+	if(conf.map[twitchUser.id].reddit) {
+		for (let subredditName of conf.map[twitchUser.id].reddit) {
+			let subreddit = r.getSubreddit(subredditName);
+
+			Promise.all([
+				fetch(`https://api.devwars.tv/game/upcoming`),
+				subreddit.getSettings()
+			]).then(([gamesReq, subredditSettings]) => {
+				processResponse(gamesReq).then(games => {
+					let sidebar = subredditSettings.description.split("[](#" + subredditName.toLowerCase() + ")");
+					if(sidebar.length != 3) throw new Error("Sidebar tag count mismatch");
+
+					if(isStreamOnline) {
+						sidebar[1] = `[● DEVWARS LIVE](https://www.twitch.tv/${twitchUser.login})`;
+					} else {
+						sidebar[1] = "**Next DevWars:**[](#linebreak) ";
+						if(games.length > 0 && games[0].timestamp) {
+							let d = new Date(games[0].timestamp);
+							sidebar[1] += "*" + days[d.getUTCDay()] + ", " + months[d.getUTCMonth()] + " " + d.getUTCDate() + " - " + ((d.getUTCHours() % 12) < 10 ? "0" : "") + (d.getUTCHours() % 12) + ":" + (d.getUTCMinutes() < 10 ? "0" : "") + d.getUTCMinutes() + " " + (d.getUTCHours() - 12 < 0 ? "AM" : "PM") + " UTC*";
+						} else {
+							sidebar[1] += "*No upcoming games scheduled*";
+						}
+					}
+
+					subreddit.editSettings({"description": sidebar.join("[](#" + subredditName.toLowerCase() + ")")}).then().catch(err => {
+						console.error(`Unable to set settings of /r/${subredditName}:`, err);
+					});
+				}).catch(err => {
+					console.error(`Unable to get game info :`, err);
+				});
+			}).catch(err => {
+				console.error(`Unable to get game info or /r/${subredditName} settings:`, err);
+			});
+		}
+	}
+};
+
+c.on('ready', () => {
+    console.info(`Logged in as ${c.user.tag}, listening for online status changes of ${Object.keys(config.map).length} Twitch channels.`);
+
+    t.on('streams', ({ options, event }) => {
+		// Get user details
+		fetch(`https://api.twitch.tv/helix/users?id=${options.user_id}`, { "headers": { "Client-ID": config.twitch.client_id } }).then(processResponse).then(twitchUser => {
+			if(twitchUser.data.length > 0) {
+				updateSubredditHeaders(twitchUser.data[0], (event.data.length > 0));
+				if(event.data.length > 0) postInDiscordChannels(twitchUser.data[0], event.data[0]);
+			} else {
+				throw new Error("User not found");
+			}
+		}).catch(err => {
+			console.error(`Unable to get details of a Twitch user with ID ${options.user_id}:`, err);
+		});
+	});
+});
+
+// Twitch webhook lifecycle
+for (let twitchId of Object.keys(config.map)) t.subscribe('streams', { user_id: twitchId });
+t.on('unsubscibe', obj => t.subscribe(obj['hub.topic']));
+
+process.on('SIGINT', () => {
+    t.unsubscribe('*');
+    process.exit(0);
+});
+
+// Everything is set up, ready to start
+c.login(conf.discord);
