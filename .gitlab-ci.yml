@@ -1,0 +1,25 @@
+publish:
+    stage: deploy
+    only:
+        - tags
+    environment:
+        name: npm
+    image: node:latest
+    script:
+        - npm publish
+        - echo '//registry.npmjs.org/:_authToken=${NPM_TOKEN}'>.npmrc
+
+push:
+    stage: deploy
+    only:
+        - tags
+    environment:
+        name: registry
+    image: docker:stable
+    services:
+        - docker:dind
+    script:
+        - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+        - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA" -t "$CI_REGISTRY_IMAGE:latest" .
+        - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+        - docker push "$CI_REGISTRY_IMAGE:latest"
