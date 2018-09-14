@@ -10,7 +10,11 @@ Run a Docker image from [here](https://gitlab.com/dpeukert/devwars-stream-status
 
 ## Changelog
 
-13\. 9. 2017 - 1.0.0 - initial version
+14\. 9. 2017 - 1.0.2 - added some logging
+
+14\. 9. 2017 - 1.0.1 - fixed config references
+
+14\. 9. 2017 - 1.0.0 - initial version
 
 ## License
 

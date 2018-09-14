@@ -38,6 +38,8 @@ let postInDiscordChannels = (twitchUser, twitchStream) => {
 			let channel = c.channels.get(channelId);
 			if(!channel) continue;
 
+			console.info(`Posting an embed to ${channelId} - ${twitchUser.display_name} is now live);
+
 			const embed = new djs.RichEmbed()
 			.attachFile("./twitch.png")
 			.setAuthor(`${twitchUser.display_name} is now streaming!`, twitchUser.profile_image_url)
@@ -69,8 +71,10 @@ let updateSubredditHeaders = (twitchUser, isStreamOnline) => {
 					if(sidebar.length != 3) throw new Error("Sidebar tag count mismatch");
 
 					if(isStreamOnline) {
+						console.info(`Changing the header of /r/${subredditName} - ${twitchUser.display_name} is now live`);
 						sidebar[1] = `[● DEVWARS LIVE](https://www.twitch.tv/${twitchUser.login})`;
 					} else {
+						console.info(`Changing the header of /r/${subredditName} - ${twitchUser.display_name} is now offline`);
 						sidebar[1] = "**Next DevWars:**[](#linebreak) ";
 						if(games.length > 0 && games[0].timestamp) {
 							let d = new Date(games[0].timestamp);
