@@ -94,11 +94,11 @@ let updateSubredditHeaders = (twitchUser, isStreamOnline) => {
 };
 
 c.on('ready', () => {
-    console.info(`Logged in as ${c.user.tag}, listening for online status changes of ${Object.keys(config.map).length} Twitch channels.`);
+    console.info(`Logged in as ${c.user.tag}, listening for online status changes of ${Object.keys(conf.map).length} Twitch channels.`);
 
     t.on('streams', ({ options, event }) => {
 		// Get user details
-		fetch(`https://api.twitch.tv/helix/users?id=${options.user_id}`, { "headers": { "Client-ID": config.twitch.client_id } }).then(processResponse).then(twitchUser => {
+		fetch(`https://api.twitch.tv/helix/users?id=${options.user_id}`, { "headers": { "Client-ID": conf.twitch.clientId } }).then(processResponse).then(twitchUser => {
 			if(twitchUser.data.length > 0) {
 				updateSubredditHeaders(twitchUser.data[0], (event.data.length > 0));
 				if(event.data.length > 0) postInDiscordChannels(twitchUser.data[0], event.data[0]);
@@ -112,7 +112,7 @@ c.on('ready', () => {
 });
 
 // Twitch webhook lifecycle
-for (let twitchId of Object.keys(config.map)) t.subscribe('streams', { user_id: twitchId });
+for (let twitchId of Object.keys(conf.map)) t.subscribe('streams', { user_id: twitchId });
 t.on('unsubscibe', obj => t.subscribe(obj['hub.topic']));
 
 process.on('SIGINT', () => {
@@ -121,4 +121,4 @@ process.on('SIGINT', () => {
 });
 
 // Everything is set up, ready to start
-c.login(conf.discord);
+c.login(conf.discordToken);
