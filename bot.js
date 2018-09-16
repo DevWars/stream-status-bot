@@ -38,7 +38,7 @@ let postInDiscordChannels = (twitchUser, twitchStream) => {
 			let channel = c.channels.get(channelId);
 			if(!channel) continue;
 
-			console.info(`Posting an embed to ${channelId} - ${twitchUser.display_name} is now live);
+			console.info(`Posting an embed to ${channelId} - ${twitchUser.display_name} is now live`);
 
 			const embed = new djs.RichEmbed()
 			.attachFile("./twitch.png")
