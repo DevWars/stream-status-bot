@@ -58,8 +58,8 @@ let postInDiscordChannels = (twitchUser, twitchStream) => {
 };
 
 let updateSubredditHeaders = (twitchUser, isStreamOnline) => {
-	if(conf.map[twitchUser.id].reddit) {
-		for (let subredditName of conf.map[twitchUser.id].reddit) {
+	if(conf.map[twitchUser.id].redditHeader) {
+		for (let subredditName of conf.map[twitchUser.id].redditHeader) {
 			let subreddit = r.getSubreddit(subredditName);
 
 			Promise.all([
@@ -97,6 +97,18 @@ let updateSubredditHeaders = (twitchUser, isStreamOnline) => {
 	}
 };
 
+let postSubredditPosts = (twitchUser, twitchStream) => {
+	if(conf.map[twitchUser.id].redditPost) {
+		for (let subredditName of conf.map[twitchUser.id].redditPost) {
+			let subreddit = r.getSubreddit(subredditName);
+
+			subreddit.submitLink({ "title": twitchStream.title, "url": `https://www.twitch.tv/${twitchUser.login}`, "resubmit": true }).then().catch(err => {
+				console.error(`Unable to post to /r/${subredditName}:`, err);
+			});
+		}
+	}
+};
+
 c.on('ready', () => {
     console.info(`Logged in as ${c.user.tag}, listening for online status changes of ${Object.keys(conf.map).length} Twitch channels.`);
 
@@ -105,7 +117,10 @@ c.on('ready', () => {
 		fetch(`https://api.twitch.tv/helix/users?id=${options.user_id}`, { "headers": { "Client-ID": conf.twitch.clientId } }).then(processResponse).then(twitchUser => {
 			if(twitchUser.data.length > 0) {
 				updateSubredditHeaders(twitchUser.data[0], (event.data.length > 0));
-				if(event.data.length > 0) postInDiscordChannels(twitchUser.data[0], event.data[0]);
+				if(event.data.length > 0) {
+					postInDiscordChannels(twitchUser.data[0], event.data[0]);
+					postSubredditPosts(twitchUser.data[0], event.data[0]);
+				}
 			} else {
 				throw new Error("User not found");
 			}

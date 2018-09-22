@@ -18,7 +18,8 @@
 		},
 		"77543873": {
 			"discord": [ "112233445566778899" ],
-			"reddit": [ "DevWars" ]
+			"redditHeader": [ "DevWars" ],
+			"redditPost": [ "DevWars", "TestSubreddit" ],
 		}
 	}
 }
