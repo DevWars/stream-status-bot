@@ -102,6 +102,8 @@ let postSubredditPosts = (twitchUser, twitchStream) => {
 		for (let subredditName of conf.map[twitchUser.id].redditPost) {
 			let subreddit = r.getSubreddit(subredditName);
 
+			console.info(`Posting to /r/${subredditName} - ${twitchUser.display_name} is now live`);
+
 			subreddit.submitLink({ "title": twitchStream.title, "url": `https://www.twitch.tv/${twitchUser.login}`, "resubmit": true }).then().catch(err => {
 				console.error(`Unable to post to /r/${subredditName}:`, err);
 			});

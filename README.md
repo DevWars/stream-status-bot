@@ -10,6 +10,8 @@ Run a Docker image from [here](https://gitlab.com/dpeukert/devwars-stream-status
 
 ## Changelog
 
+22\. 9. 2017 - 1.1.1 - added some more logging
+
 22\. 9. 2017 - 1.1.0 - added a feature to submit reddit posts
 
 16\. 9. 2017 - 1.0.3 - fixed logging
