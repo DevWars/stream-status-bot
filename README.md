@@ -10,17 +10,19 @@ Run a Docker image from [here](https://gitlab.com/dpeukert/devwars-stream-status
 
 ## Changelog
 
-22\. 9. 2017 - 1.1.1 - added some more logging
+20\. 4. 2019 - 1.1.2 - added more error handling, updated dependencies
 
-22\. 9. 2017 - 1.1.0 - added a feature to submit reddit posts
+22\. 9. 2018 - 1.1.1 - added some more logging
 
-16\. 9. 2017 - 1.0.3 - fixed logging
+22\. 9. 2018 - 1.1.0 - added a feature to submit reddit posts
 
-14\. 9. 2017 - 1.0.2 - added some logging
+16\. 9. 2018 - 1.0.3 - fixed logging
 
-14\. 9. 2017 - 1.0.1 - fixed config references
+14\. 9. 2018 - 1.0.2 - added some logging
 
-14\. 9. 2017 - 1.0.0 - initial version
+14\. 9. 2018 - 1.0.1 - fixed config references
+
+14\. 9. 2018 - 1.0.0 - initial version
 
 ## License
 
