@@ -34,11 +34,11 @@ const processResponse = (res) => {
 
 const postInDiscordChannels = (twitchUser, twitchStream) => {
 	if(conf.map[twitchUser.id].discord) {
-		for(const channelId of conf.map[twitchUser.id].discord) {
-			const channel = c.channels.get(channelId);
+		for(const channelConf of conf.map[twitchUser.id].discord) {
+			const channel = c.channels.get(typeof channelConf === 'string' ? channelConf : channelConf.channel);
 			if(!channel) continue;
 
-			console.info(`Posting an embed to ${channelId} - ${twitchUser.display_name} is now live`);
+			console.info(`Posting an embed to ${channel.id} - ${twitchUser.display_name} is now live`);
 
 			const embed = new djs.RichEmbed()
 				.attachFile('./twitch.png')
@@ -50,8 +50,8 @@ const postInDiscordChannels = (twitchUser, twitchStream) => {
 				.setTimestamp(new Date(twitchStream.started_at))
 				.setColor(6570404);
 
-			channel.send('@everyone', embed).then().catch((err) => {
-				console.error(`Unable to send a message to a Discord channel with ID ${channelId}:`, err);
+			channel.send((typeof channelConf !== 'string' && channelConf.message ? channelConf.message : ''), embed).then().catch((err) => {
+				console.error(`Unable to send a message to a Discord channel with ID ${channel.id}:`, err);
 			});
 		}
 	}
@@ -97,9 +97,9 @@ const updateSubredditHeaders = (twitchUser, isStreamOnline) => {
 let postSubredditPosts = (twitchUser, twitchStream) => {
 	if(conf.map[twitchUser.id].redditPost) {
 		for(const subredditConf of conf.map[twitchUser.id].redditPost) {
-			const subreddit = (typeof subredditConf === 'string' ? subredditConf : subredditConf.subreddit);
-
+			const subredditName = (typeof subredditConf === 'string' ? subredditConf : subredditConf.subreddit);
 			let title;
+
 			if(typeof subredditConf !== 'string' && subredditConf.title) {
 				const streamDate = new Date(twitchStream.started_at);
 				title = subredditConf.title
@@ -110,9 +110,9 @@ let postSubredditPosts = (twitchUser, twitchStream) => {
 				title = twitchStream.title;
 			}
 
-			console.info(`Posting to /r/${subreddit} - ${twitchUser.display_name} is now live`);
+			console.info(`Posting to /r/${subredditName} - ${twitchUser.display_name} is now live`);
 
-			r.getSubreddit(subreddit).submitLink({'title': title, 'url': `https://www.twitch.tv/${twitchUser.login}`, 'resubmit': true}).then().catch(err => {
+			r.getSubreddit(subredditName).submitLink({'title': title, 'url': `https://www.twitch.tv/${twitchUser.login}`, 'resubmit': true}).then().catch(err => {
 				console.error(`Unable to post to /r/${subredditName}:`, err);
 			});
 		}

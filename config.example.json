@@ -17,7 +17,13 @@
 			"discord": [ "112233445566778899" ]
 		},
 		"77543873": {
-			"discord": [ "112233445566778899" ],
+			"discord": [
+				"112233445566778899",
+				{
+					"channel": "223344556677889900",
+					"message": "@here"
+				}
+			],
 			"redditHeader": [ "DevWars" ],
 			"redditPost": [
 				"DevWars",
