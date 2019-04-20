@@ -22,7 +22,7 @@
 		"start": "node bot.js"
 	},
 	"dependencies": {
-		"node-fetch": "2.2.0",
+		"node-fetch": "2.3.0",
 		"snoowrap": "1.15.2",
 		"discord.js": "11.4.2",
 		"twitch-webhook": "1.2.4"
