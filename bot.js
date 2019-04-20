@@ -108,6 +108,10 @@ let postSubredditPosts = (twitchUser, twitchStream) => {
 	}
 };
 
+c.on('error', (err) =>{
+	console.error('A discord.js WebSocket connection error occurred:', err);
+});
+
 c.on('ready', () => {
 	console.info(`Logged in as ${c.user.tag}, listening for online status changes of ${Object.keys(conf.map).length} Twitch channels.`);
 
