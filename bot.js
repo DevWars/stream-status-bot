@@ -25,17 +25,17 @@ const r = new snoowrap({
 	clientSecret: conf.reddit.clientSecret
 });
 
-let processResponse = (res) => {
+const processResponse = (res) => {
 	return new Promise((resolve, reject) => {
 		if(!res.ok) reject(`${res.status}: ${res.statusText}`);
 		else res.json().then(resolve).catch(reject);
 	});
 };
 
-let postInDiscordChannels = (twitchUser, twitchStream) => {
+const postInDiscordChannels = (twitchUser, twitchStream) => {
 	if(conf.map[twitchUser.id].discord) {
-		for(let channelId of conf.map[twitchUser.id].discord) {
-			let channel = c.channels.get(channelId);
+		for(const channelId of conf.map[twitchUser.id].discord) {
+			const channel = c.channels.get(channelId);
 			if(!channel) continue;
 
 			console.info(`Posting an embed to ${channelId} - ${twitchUser.display_name} is now live`);
@@ -50,17 +50,17 @@ let postInDiscordChannels = (twitchUser, twitchStream) => {
 				.setTimestamp(new Date(twitchStream.started_at))
 				.setColor(6570404);
 
-			channel.send(embed).then().catch((err) => {
+			channel.send('@everyone', embed).then().catch((err) => {
 				console.error(`Unable to send a message to a Discord channel with ID ${channelId}:`, err);
 			});
 		}
 	}
 };
 
-let updateSubredditHeaders = (twitchUser, isStreamOnline) => {
+const updateSubredditHeaders = (twitchUser, isStreamOnline) => {
 	if(conf.map[twitchUser.id].redditHeader) {
-		for(let subredditName of conf.map[twitchUser.id].redditHeader) {
-			let subreddit = r.getSubreddit(subredditName);
+		for(const subredditName of conf.map[twitchUser.id].redditHeader) {
+			const subreddit = r.getSubreddit(subredditName);
 
 			Promise.all([fetch(`https://api.devwars.tv/game/upcoming`), subreddit.getSettings()]).then(([gamesReq, subredditSettings]) => {
 				processResponse(gamesReq).then((games) => {
@@ -74,7 +74,7 @@ let updateSubredditHeaders = (twitchUser, isStreamOnline) => {
 						console.info(`Changing the header of /r/${subredditName} - ${twitchUser.display_name} is now offline`);
 						sidebar[1] = '**Next DevWars:**[](#linebreak) ';
 						if(games.length > 0 && games[0].timestamp) {
-							let d = new Date(games[0].timestamp);
+							const d = new Date(games[0].timestamp);
 							sidebar[1] += `*${days[d.getUTCDay()]}, ${months[d.getUTCMonth()]} ${d.getUTCDate()} - ${(d.getUTCHours() % 12) < 10 ? '0' : ''}${d.getUTCHours() % 12}:${d.getUTCMinutes() < 10 ? '0' : ''}${d.getUTCMinutes()} ${d.getUTCHours() - 12 < 0 ? 'AM' : 'PM'} UTC*`;
 						} else {
 							sidebar[1] += '*No upcoming games scheduled*';
@@ -96,12 +96,23 @@ let updateSubredditHeaders = (twitchUser, isStreamOnline) => {
 
 let postSubredditPosts = (twitchUser, twitchStream) => {
 	if(conf.map[twitchUser.id].redditPost) {
-		for(let subredditName of conf.map[twitchUser.id].redditPost) {
-			let subreddit = r.getSubreddit(subredditName);
+		for(const subredditConf of conf.map[twitchUser.id].redditPost) {
+			const subreddit = (typeof subredditConf === 'string' ? subredditConf : subredditConf.subreddit);
 
-			console.info(`Posting to /r/${subredditName} - ${twitchUser.display_name} is now live`);
+			let title;
+			if(typeof subredditConf !== 'string' && subredditConf.title) {
+				const streamDate = new Date(twitchStream.started_at);
+				title = subredditConf.title
+					.replace('{year}', streamDate.getUTCFullYear())
+					.replace('{month}', `${streamDate.getUTCMonth() < 9 ? '0' : ''}${streamDate.getUTCMonth() + 1}`)
+					.replace('{day}', `${streamDate.getUTCDate() < 10 ? '0' : ''}${streamDate.getUTCDate()}`);
+			} else {
+				title = twitchStream.title;
+			}
 
-			subreddit.submitLink({'title': twitchStream.title, 'url': `https://www.twitch.tv/${twitchUser.login}`, 'resubmit': true}).then().catch(err => {
+			console.info(`Posting to /r/${subreddit} - ${twitchUser.display_name} is now live`);
+
+			r.getSubreddit(subreddit).submitLink({'title': title, 'url': `https://www.twitch.tv/${twitchUser.login}`, 'resubmit': true}).then().catch(err => {
 				console.error(`Unable to post to /r/${subredditName}:`, err);
 			});
 		}
@@ -134,7 +145,7 @@ c.on('ready', () => {
 });
 
 // Twitch webhook lifecycle
-for(let twitchId of Object.keys(conf.map)) t.subscribe('streams', {'user_id': twitchId});
+for(const twitchId of Object.keys(conf.map)) t.subscribe('streams', {'user_id': twitchId});
 t.on('unsubscibe', obj => t.subscribe(obj['hub.topic']));
 
 process.on('SIGINT', () => {
