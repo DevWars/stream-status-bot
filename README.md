@@ -10,6 +10,8 @@ Run a Docker image from [here](https://gitlab.com/dpeukert/devwars-stream-status
 
 ## Changelog
 
+14\. 5. 2019 - 1.3.1 - updated dependencies
+
 21\. 4. 2019 - 1.3.0 - added option to set a custom Discord message
 
 20\. 4. 2019 - 1.2.0 - added a tag to Discord posts, added option to use a custom title for Reddit posts
