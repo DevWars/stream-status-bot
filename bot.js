@@ -146,7 +146,7 @@ c.on('ready', () => {
 
 // Twitch webhook lifecycle
 for(const twitchId of Object.keys(conf.map)) t.subscribe('streams', {'user_id': twitchId});
-t.on('unsubscibe', obj => t.subscribe(obj['hub.topic']));
+t.on('unsubscribe', obj => t.subscribe(obj['hub.topic']));
 
 process.on('SIGINT', () => {
 	t.unsubscribe('*');
