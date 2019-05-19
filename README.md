@@ -10,6 +10,8 @@ Run a Docker image from [here](https://gitlab.com/dpeukert/devwars-stream-status
 
 ## Changelog
 
+19\. 5. 2019 - 1.3.2 - fixed resubscribing logic, fixed to only process each notification once, updated dependencies
+
 14\. 5. 2019 - 1.3.1 - updated dependencies
 
 21\. 4. 2019 - 1.3.0 - added option to set a custom Discord message
