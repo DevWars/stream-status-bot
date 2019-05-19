@@ -129,13 +129,13 @@ c.on('ready', () => {
 	console.info(`Logged in as ${c.user.tag}, listening for online status changes of ${Object.keys(conf.map).length} Twitch channels.`);
 
 	t.on('streams', ({options, event}) => {
-		if(!processedNotifications[event.data[0].id]) {
+		if(event.data.length === 0 || !processedNotifications[event.data[0].id]) {
 			// Get user details
 			fetch(`https://api.twitch.tv/helix/users?id=${options.user_id}`, {'headers': {'Client-ID': conf.twitch.clientId}}).then(processResponse).then(twitchUser => {
 				if(twitchUser.data.length > 0) {
-					processedNotifications[event.data[0].id] = true;				
 					updateSubredditHeaders(twitchUser.data[0], (event.data.length > 0));
 					if(event.data.length > 0) {
+						processedNotifications[event.data[0].id] = true;
 						postInDiscordChannels(twitchUser.data[0], event.data[0]);
 						postSubredditPosts(twitchUser.data[0], event.data[0]);
 					}
