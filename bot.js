@@ -6,8 +6,8 @@ const snoowrap = require('snoowrap');
 const djs = require('discord.js');
 
 const conf = require('./config.json');
-
 const p = require('./package.json');
+
 const c = new djs.Client();
 const t = new (require('twitch-webhook'))({
 	'client_id': conf.twitch.clientId,
@@ -24,6 +24,8 @@ const r = new snoowrap({
 	clientId: conf.reddit.clientId,
 	clientSecret: conf.reddit.clientSecret
 });
+
+let processedNotifications = {};
 
 const processResponse = (res) => {
 	return new Promise((resolve, reject) => {
@@ -127,20 +129,23 @@ c.on('ready', () => {
 	console.info(`Logged in as ${c.user.tag}, listening for online status changes of ${Object.keys(conf.map).length} Twitch channels.`);
 
 	t.on('streams', ({options, event}) => {
-		// Get user details
-		fetch(`https://api.twitch.tv/helix/users?id=${options.user_id}`, {'headers': {'Client-ID': conf.twitch.clientId}}).then(processResponse).then(twitchUser => {
-			if(twitchUser.data.length > 0) {
-				updateSubredditHeaders(twitchUser.data[0], (event.data.length > 0));
-				if(event.data.length > 0) {
-					postInDiscordChannels(twitchUser.data[0], event.data[0]);
-					postSubredditPosts(twitchUser.data[0], event.data[0]);
+		if(!processedNotifications[event.data[0].id]) {
+			// Get user details
+			fetch(`https://api.twitch.tv/helix/users?id=${options.user_id}`, {'headers': {'Client-ID': conf.twitch.clientId}}).then(processResponse).then(twitchUser => {
+				if(twitchUser.data.length > 0) {
+					processedNotifications[event.data[0].id] = true;				
+					updateSubredditHeaders(twitchUser.data[0], (event.data.length > 0));
+					if(event.data.length > 0) {
+						postInDiscordChannels(twitchUser.data[0], event.data[0]);
+						postSubredditPosts(twitchUser.data[0], event.data[0]);
+					}
+				} else {
+					throw new Error('User not found');
 				}
-			} else {
-				throw new Error('User not found');
-			}
-		}).catch(err => {
-			console.error(`Unable to get details of a Twitch user with ID ${options.user_id}:`, err);
-		});
+			}).catch(err => {
+				console.error(`Unable to get details of a Twitch user with ID ${options.user_id}:`, err);
+			});
+		}
 	});
 });
 
