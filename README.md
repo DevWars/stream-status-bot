@@ -10,6 +10,8 @@ Run a Docker image from [here](https://gitlab.com/dpeukert/devwars-stream-status
 
 ## Changelog
 
+10\. 4. 2020 - 1.3.5 - switched to token auth for Twitch, updated dependencies
+
 10\. 1. 2020 - 1.3.4 - updated dependencies
 
 19\. 5. 2019 - 1.3.3 - fixed repeat notification checking logic for stream end events
