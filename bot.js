@@ -25,6 +25,11 @@ const r = new snoowrap({
 	clientSecret: conf.reddit.clientSecret
 });
 
+let twitchAuth = {
+	token: null,
+	lastValidation: null
+}
+
 let processedNotifications = {};
 
 const processResponse = (res) => {
@@ -33,6 +38,50 @@ const processResponse = (res) => {
 		else res.json().then(resolve).catch(reject);
 	});
 };
+
+const requestTwitchToken = () => {
+	return new Promise((resolve, reject) => {
+		const qs = Object.entries({
+			'client_id': conf.twitch.clientId,
+			'client_secret': conf.twitch.secret,
+			'grant_type': 'client_credentials'
+		}).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+
+		fetch(`https://id.twitch.tv/oauth2/token?${qs}`, {'method': 'POST'}).then(processResponse).then(res => {
+			console.info('Twitch token acquired');
+			twitchAuth.token = res.access_token;
+			twitchAuth.lastValidation = Date.now();
+			resolve(twitchAuth.token);
+		}).catch(err => {
+			console.error(`Unable to acquire a Twitch token, trying again in 10 seconds:`, err);
+			setTimeout(() => {
+				resolve(requestTwitchToken());
+			}, 10000)
+		});
+	});
+};
+
+const getTwitchToken = () => {
+	return new Promise((resolve, reject) => {
+		const currentTimestamp = Date.now();
+		if(twitchAuth.token !== null) {
+			if(twitchAuth.lastValidation + 60 * 60 * 1000 < currentTimestamp) {
+				fetch(`https://id.twitch.tv/oauth2/validate`, {'headers': {'Authorization': `OAuth ${twitchAuth.token}`}}).then(res => {
+					console.info('Twitch token validated');
+					twitchAuth.lastValidation = currentTimestamp;
+					resolve(twitchAuth.token);
+				}).catch(err => {
+					console.info('Twitch token not valid, getting a new one');
+					resolve(requestTwitchToken());
+				});
+			} else {
+				resolve(twitchAuth.token);
+			}
+		} else {
+			resolve(requestTwitchToken());
+		}
+	});
+}
 
 const postInDiscordChannels = (twitchUser, twitchStream) => {
 	if(conf.map[twitchUser.id].discord) {
@@ -131,7 +180,12 @@ c.on('ready', () => {
 	t.on('streams', ({options, event}) => {
 		if(event.data.length === 0 || !processedNotifications[event.data[0].id]) {
 			// Get user details
-			fetch(`https://api.twitch.tv/helix/users?id=${options.user_id}`, {'headers': {'Client-ID': conf.twitch.clientId}}).then(processResponse).then(twitchUser => {
+			getTwitchToken().then(token => {
+				return fetch(`https://api.twitch.tv/helix/users?id=${options.user_id}`, {'headers': {
+					'Authorization': `Bearer ${token}`,
+					'Client-ID': conf.twitch.clientId
+				}});
+			}).then(processResponse).then(twitchUser => {
 				if(twitchUser.data.length > 0) {
 					updateSubredditHeaders(twitchUser.data[0], (event.data.length > 0));
 					if(event.data.length > 0) {
