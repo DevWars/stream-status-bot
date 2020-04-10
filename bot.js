@@ -37,7 +37,7 @@ const processResponse = (res) => {
 const postInDiscordChannels = (twitchUser, twitchStream) => {
 	if(conf.map[twitchUser.id].discord) {
 		for(const channelConf of conf.map[twitchUser.id].discord) {
-			const channel = c.channels.get(typeof channelConf === 'string' ? channelConf : channelConf.channel);
+			const channel = c.channels.cache.get(typeof channelConf === 'string' ? channelConf : channelConf.channel);
 			if(!channel) continue;
 
 			console.info(`Posting an embed to ${channel.id} - ${twitchUser.display_name} is now live`);
