@@ -10,6 +10,8 @@ Run a Docker image from [here](https://gitlab.com/dpeukert/devwars-stream-status
 
 ## Changelog
 
+4\. 5. 2020 - 1.3.6 - fixed embeds, updated dependencies
+
 10\. 4. 2020 - 1.3.5 - switched to token auth for Twitch, updated dependencies
 
 10\. 1. 2020 - 1.3.4 - updated dependencies
