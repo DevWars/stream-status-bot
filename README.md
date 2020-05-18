@@ -10,6 +10,8 @@ Run a Docker image from [here](https://gitlab.com/dpeukert/devwars-stream-status
 
 ## Changelog
 
+18\. 5. 2020 - 1.4.1 - fixed typo
+
 18\. 5. 2020 - 1.4.0 - fixed twitch webhooks
 
 4\. 5. 2020 - 1.3.6 - fixed embeds, updated dependencies
