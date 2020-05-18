@@ -8,30 +8,6 @@ const djs = require('discord.js');
 const conf = require('./config.json');
 const p = require('./package.json');
 
-const c = new djs.Client();
-const t = new (require('twitch-webhook'))({
-	'client_id': conf.twitch.clientId,
-	'callback': conf.twitch.callback,
-	'secret': conf.twitch.secret,
-	'listen': {
-		'port': conf.twitch.port
-	}
-});
-const r = new snoowrap({
-	userAgent: `${p.name}/${p.version} by ${conf.reddit.username}`,
-	username: conf.reddit.username,
-	password: conf.reddit.password,
-	clientId: conf.reddit.clientId,
-	clientSecret: conf.reddit.clientSecret
-});
-
-let twitchAuth = {
-	token: null,
-	lastValidation: null
-}
-
-let processedNotifications = {};
-
 const processResponse = (res) => {
 	return new Promise((resolve, reject) => {
 		if(!res.ok) reject(`${res.status}: ${res.statusText}`);
@@ -145,11 +121,11 @@ const updateSubredditHeaders = (twitchUser, isStreamOnline) => {
 	}
 };
 
-let postSubredditPosts = (twitchUser, twitchStream) => {
+const postSubredditPosts = (twitchUser, twitchStream) => {
 	if(conf.map[twitchUser.id].redditPost) {
 		for(const subredditConf of conf.map[twitchUser.id].redditPost) {
 			const subredditName = (typeof subredditConf === 'string' ? subredditConf : subredditConf.subreddit);
-			let title;
+			let title = '';
 
 			if(typeof subredditConf !== 'string' && subredditConf.title) {
 				const streamDate = new Date(twitchStream.started_at);
@@ -169,6 +145,33 @@ let postSubredditPosts = (twitchUser, twitchStream) => {
 		}
 	}
 };
+
+const c = new djs.Client();
+
+const t = new (require('twitch-webhook'))({
+	'client_id': conf.twitch.clientId,
+	'callback': conf.twitch.callback,
+	'secret': conf.twitch.secret,
+	'listen': {
+		'port': conf.twitch.port
+	},
+	'tokenPromise': getTwitchToken
+});
+
+const r = new snoowrap({
+	userAgent: `${p.name}/${p.version} by ${conf.reddit.username}`,
+	username: conf.reddit.username,
+	password: conf.reddit.password,
+	clientId: conf.reddit.clientId,
+	clientSecret: conf.reddit.clientSecret
+});
+
+let twitchAuth = {
+	token: null,
+	lastValidation: null
+}
+
+let processedNotifications = {};
 
 c.on('error', (err) =>{
 	console.error('A discord.js WebSocket connection error occurred:', err);

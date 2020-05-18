@@ -1,0 +1,44 @@
+diff --git a/node_modules/twitch-webhook/src/index.js b/node_modules/twitch-webhook/src/index.js
+index f8938f0..1996cdc 100755
+--- a/node_modules/twitch-webhook/src/index.js
++++ b/node_modules/twitch-webhook/src/index.js
+@@ -40,6 +40,10 @@ class TwitchWebhook extends EventEmitter {
+ 
+     if (!options.callback) {
+       throw new errors.FatalError('Callback URL not provided!')
++	}
++
++    if (!options.tokenPromise) {
++      throw new errors.FatalError('Token promise not provided!')
+     }
+ 
+     super()
+@@ -175,17 +179,17 @@ class TwitchWebhook extends EventEmitter {
+       requestOptions.qs['hub.secret'] = secret
+     }
+ 
+-    return request
+-      .post(requestOptions)
+-      .catch(err => {
+-        throw new errors.RequestDenied(err)
+-      })
+-      .then(response => {
+-        this._subscriptions[topic] = {}
+-        if (this._options.secret) {
+-          this._subscriptions[topic].secret = requestOptions.qs['hub.secret']
+-        }
+-      })
++    return options.tokenPromise.then(token => {
++      requestOptions.headers['Authorization'] = `Bearer ${token}`
++      return request.post(requestOptions)
++    }).catch(err => {
++      throw new errors.RequestDenied(err)
++    }).then(response => {
++      this._subscriptions[topic] = {}
++      if (this._options.secret) {
++        this._subscriptions[topic].secret = requestOptions.qs['hub.secret']
++      }
++    })
+   }
+ 
+   /**
