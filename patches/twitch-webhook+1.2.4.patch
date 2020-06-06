@@ -28,7 +28,7 @@ index f8938f0..fff34b6 100755
 -          this._subscriptions[topic].secret = requestOptions.qs['hub.secret']
 -        }
 -      })
-+    return this._options.tokenPromise.then(token => {
++    return this._options.tokenPromise().then(token => {
 +      requestOptions.headers['Authorization'] = `Bearer ${token}`
 +      return request.post(requestOptions)
 +    }).catch(err => {
