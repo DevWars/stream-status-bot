@@ -237,14 +237,13 @@ t.on('listening', () => {
 	for (const sig of ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'uncaughtException', 'SIGTERM']) process.on(sig, exitFunc);
 
 	for (const twitchId of Object.keys(conf.map)) {
-		t.subscribe('streams', {'user_id': twitchId}).then(() => {
-			console.log('subscribed gud');
-		}).catch((err) => {
+		t.subscribe('streams', {'user_id': twitchId}).then(() => {}).catch((err) => {
 			console.error('Unable to subscribe to a Twitch webhook topic:', err);
-			console.error(err.response.options.headers);
 			exitFunc();
 		});
 	}
+
+	console.info(`Listening for online status changes of ${Object.keys(conf.map).length} Twitch channels`);
 });
 
 // Discord
@@ -256,7 +255,7 @@ d.on('error', (err) => {
 });
 
 d.on('ready', () => {
-	console.info(`Logged in as ${d.user.tag}, listening for online status changes of ${Object.keys(conf.map).length} Twitch channels.`);
+	console.info(`Logged in as ${d.user.tag}`);
 	t.listen().then(() => {}).catch((err) => {
 		console.error('Unable to start listening to Twitch webhooks:', err);
 		d.destroy();
