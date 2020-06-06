@@ -15,7 +15,7 @@ const processResponse = (res) => {
 	});
 };
 
-const requestTwitchToken = () => {
+const requestTwitchToken = (retry = true) => {
 	return new Promise((resolve, reject) => {
 		const qs = Object.entries({
 			'client_id': conf.twitch.clientId,
@@ -29,10 +29,14 @@ const requestTwitchToken = () => {
 			twitchAuth.lastValidation = Date.now();
 			resolve(twitchAuth.token);
 		}).catch(err => {
-			console.error(`Unable to acquire a Twitch token, trying again in 10 seconds:`, err);
-			setTimeout(() => {
-				resolve(requestTwitchToken());
-			}, 10000)
+			if(retry) {
+				console.error('Unable to acquire a Twitch token, trying again in 10 seconds:', err);
+				setTimeout(() => {
+					resolve(requestTwitchToken());
+				}, 10000)
+			} else {
+				reject(err);
+			}
 		});
 	});
 };
@@ -262,8 +266,12 @@ d.on('ready', () => {
 	});
 });
 
-// Everything is set up, let's start by logging in to Discord
+// Everything is set up, let's start by getting a token from Twitch and logging in to Discord
 
-d.login(conf.discordToken).then(() => {}).catch((err) => {
-	console.error('Unable to login to Discord:', err);
+requestTwitchToken(false).then(() => {
+	d.login(conf.discordToken).then(() => {}).catch((err) => {
+		console.error('Unable to login to Discord:', err);
+	});
+}).catch(err => {
+	console.error(`Unable to acquire a Twitch token:`, err);
 });
