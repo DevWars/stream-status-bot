@@ -1,5 +1,5 @@
 diff --git a/node_modules/twitch-webhook/src/index.js b/node_modules/twitch-webhook/src/index.js
-index f8938f0..912b697 100755
+index f8938f0..eed297e 100755
 --- a/node_modules/twitch-webhook/src/index.js
 +++ b/node_modules/twitch-webhook/src/index.js
 @@ -40,6 +40,10 @@ class TwitchWebhook extends EventEmitter {
@@ -13,10 +13,12 @@ index f8938f0..912b697 100755
      }
  
      super()
-@@ -175,17 +179,18 @@ class TwitchWebhook extends EventEmitter {
-       requestOptions.qs['hub.secret'] = secret
-     }
+@@ -173,19 +177,22 @@ class TwitchWebhook extends EventEmitter {
+         .digest('hex')
  
+       requestOptions.qs['hub.secret'] = secret
+-    }
+-
 -    return request
 -      .post(requestOptions)
 -      .catch(err => {
@@ -28,9 +30,13 @@ index f8938f0..912b697 100755
 -          this._subscriptions[topic].secret = requestOptions.qs['hub.secret']
 -        }
 -      })
++	}
++
++	console.log('before token promise', requestOptions)
++
 +    return this._options.tokenPromise().then(token => {
 +      requestOptions.headers['Authorization'] = `Bearer ${token}`
-+      console.log(requestOptions)
++      console.log('after token promise', requestOptions)
 +      return request.post(requestOptions)
 +    }).catch(err => {
 +      throw new errors.RequestDenied(err)
