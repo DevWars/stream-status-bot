@@ -10,6 +10,8 @@ Run a Docker image from [here](https://gitlab.com/dpeukert/devwars-stream-status
 
 ## Changelog
 
+6\. 6. 2020 - 1.4.9 - fixed patching
+
 6\. 6. 2020 - 1.4.8 - fixed Dockerfile
 
 6\. 6. 2020 - 1.4.7 - some more debugging
