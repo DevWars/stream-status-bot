@@ -1,5 +1,4 @@
 FROM node:alpine
-ENV NODE_ENV=production
 WORKDIR /node
 COPY package.json /node
 RUN npm install

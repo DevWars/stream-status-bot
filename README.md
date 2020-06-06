@@ -10,7 +10,9 @@ Run a Docker image from [here](https://gitlab.com/dpeukert/devwars-stream-status
 
 ## Changelog
 
-7\. 6. 2020 - 1.4.6 - even more debugging
+6\. 6. 2020 - 1.4.7 - some more debugging
+
+6\. 6. 2020 - 1.4.6 - even more debugging
 
 6\. 6. 2020 - 1.4.5 - more debugging
 

@@ -241,7 +241,7 @@ t.on('listening', () => {
 			console.log('subscribed gud');
 		}).catch((err) => {
 			console.error('Unable to subscribe to a Twitch webhook topic:', err);
-			console.error(err.options.headers);
+			console.error(err.response.options.headers);
 			exitFunc();
 		});
 	}
