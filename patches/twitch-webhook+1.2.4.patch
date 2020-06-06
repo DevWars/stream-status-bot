@@ -1,5 +1,5 @@
 diff --git a/node_modules/twitch-webhook/src/index.js b/node_modules/twitch-webhook/src/index.js
-index f8938f0..eed297e 100755
+index f8938f0..dc46786 100755
 --- a/node_modules/twitch-webhook/src/index.js
 +++ b/node_modules/twitch-webhook/src/index.js
 @@ -40,6 +40,10 @@ class TwitchWebhook extends EventEmitter {
@@ -13,7 +13,15 @@ index f8938f0..eed297e 100755
      }
  
      super()
-@@ -173,19 +177,22 @@ class TwitchWebhook extends EventEmitter {
+@@ -147,6 +151,7 @@ class TwitchWebhook extends EventEmitter {
+    * @return {Promise}
+    */
+   _request (mode, topic, options) {
++	console.log("called _request")
+     if (!isAbsoluteUrl(topic)) {
+       topic = this._apiUrl + topic
+     }
+@@ -173,19 +178,22 @@ class TwitchWebhook extends EventEmitter {
          .digest('hex')
  
        requestOptions.qs['hub.secret'] = secret
@@ -49,3 +57,11 @@ index f8938f0..eed297e 100755
    }
  
    /**
+@@ -197,6 +205,7 @@ class TwitchWebhook extends EventEmitter {
+    * @return {Promise}
+    */
+   subscribe (topic, options = {}) {
++	console.log("called subscribe")
+     return this._request('subscribe', topic, options)
+   }
+ 

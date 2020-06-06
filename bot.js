@@ -236,12 +236,15 @@ t.on('unsubscribe', (obj) => {
 t.on('listening', () => {
 	for (const sig of ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'uncaughtException', 'SIGTERM']) process.on(sig, exitFunc);
 
-	for (const twitchId of Object.keys(conf.map)) t.subscribe('streams', {'user_id': twitchId}).then(() => {
-		console.log('subscribed gud');
-	}).catch((err) => {
-		console.error('Unable to subscribe to a Twitch webhook topic:', err);
-		exitFunc();
-	});
+	for (const twitchId of Object.keys(conf.map)) {
+		t.subscribe('streams', {'user_id': twitchId}).then(() => {
+			console.log('subscribed gud');
+		}).catch((err) => {
+			console.error('Unable to subscribe to a Twitch webhook topic:', err);
+			console.error(err.options.headers);
+			exitFunc();
+		});
+	}
 });
 
 // Discord
