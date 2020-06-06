@@ -72,7 +72,7 @@ const postInDiscordChannels = (twitchUser, twitchStream) => {
 			console.info(`Posting an embed to ${channel.id} - ${twitchUser.display_name} is now live`);
 
 			const embed = new djs.MessageEmbed()
-				.attachFile('./twitch.png')
+				.attachFiles(['./twitch.png'])
 				.setAuthor(`${twitchUser.display_name} is now streaming!`, twitchUser.profile_image_url)
 				.setTitle(twitchStream.title)
 				.setURL(`https://www.twitch.tv/${twitchUser.login}`)
