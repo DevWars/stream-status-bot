@@ -1,0 +1,19 @@
+name: Push to Docker
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  docker-push:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: docker/build-push-action@v1
+        with:
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: docker.pkg.github.com
+          repository: DevWars/stream-status-bot
+          tags: latest
+          tag_with_ref: true
