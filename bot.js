@@ -93,7 +93,7 @@ const updateSubredditHeaders = (twitchUser, isStreamOnline) => {
 		for(const subredditName of conf.map[twitchUser.id].redditHeader) {
 			const subreddit = r.getSubreddit(subredditName);
 
-			Promise.all([fetch(`https://api.devwars.tv/game/upcoming`), subreddit.getSettings()]).then(([gamesReq, subredditSettings]) => {
+			Promise.all([fetch(`https://api.devwars.tv/schedules/latest?first=1`), subreddit.getSettings()]).then(([gamesReq, subredditSettings]) => {
 				processResponse(gamesReq).then((games) => {
 					let sidebar = subredditSettings.description.split(`[](#${subredditName.toLowerCase()})`);
 					if(sidebar.length != 3) throw new Error('Sidebar tag count mismatch');
@@ -104,9 +104,18 @@ const updateSubredditHeaders = (twitchUser, isStreamOnline) => {
 					} else {
 						console.info(`Changing the header of /r/${subredditName} - ${twitchUser.display_name} is now offline`);
 						sidebar[1] = '**Next DevWars:**[](#linebreak) ';
-						if(games.length > 0 && games[0].timestamp) {
-							const d = new Date(games[0].timestamp);
-							sidebar[1] += `*${days[d.getUTCDay()]}, ${months[d.getUTCMonth()]} ${d.getUTCDate()} - ${(d.getUTCHours() % 12) < 10 ? '0' : ''}${d.getUTCHours() % 12}:${d.getUTCMinutes() < 10 ? '0' : ''}${d.getUTCMinutes()} ${d.getUTCHours() - 12 < 0 ? 'AM' : 'PM'} UTC*`;
+
+						let game = null;
+						let d;
+
+						if(Array.isArray(games) && games[0].startTime) {
+							game = games[0];
+						} else if(typeof games === 'object' && games.startTime) {
+							game = games;
+						}
+
+						if(game !== null && (d = new Date(game.startTime)) > new Date() && game.status === 0) {
+							sidebar[1] += `*${days[d.getUTCDay()]}, ${months[d.getUTCMonth()]} ${d.getUTCDate()} - ${d.getUTCHours()}:${d.getUTCMinutes() < 10 ? '0' : ''}${d.getUTCMinutes()} UTC*`;
 						} else {
 							sidebar[1] += '*No upcoming games scheduled*';
 						}

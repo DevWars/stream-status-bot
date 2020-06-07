@@ -10,6 +10,8 @@ Run a Docker image from [here](https://gitlab.com/dpeukert/devwars-stream-status
 
 ## Changelog
 
+7\. 6. 2020 - 1.5.3 - fixed DevWars API
+
 6\. 6. 2020 - 1.5.2 - fixed Discord embed
 
 6\. 6. 2020 - 1.5.1 - improved Twitch token logic
