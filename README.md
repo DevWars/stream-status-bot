@@ -10,6 +10,8 @@ Run a Docker image from [here](https://github.com/DevWars/stream-status-bot/pack
 
 ## Changelog
 
+7\. 6. 2020 - 1.5.7 - update Docker repo path
+
 7\. 6. 2020 - 1.5.6 - yet another GitHub Actions test
 
 7\. 6. 2020 - 1.5.5 - another GitHub Actions test
