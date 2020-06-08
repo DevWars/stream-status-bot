@@ -10,6 +10,8 @@ Run a Docker image from [Docker Hub](https://hub.docker.com/r/devwars/stream-sta
 
 ## Changelog
 
+8\. 6. 2020 - 1.6.0 - various stability and sanity check improvements
+
 7\. 6. 2020 - 1.5.8 - switched from GitHub Docker repo to Docker Hub
 
 7\. 6. 2020 - 1.5.7 - update Docker repo path

@@ -1,6 +1,6 @@
 {
 	"name": "devwars-stream-status-bot",
-	"version": "1.5.8",
+	"version": "1.6.0",
 	"description": "A reddit and Discord stream status bot for DevWars",
 	"keywords": [
 		"devwars",
@@ -31,7 +31,7 @@
 	},
 	"dependencies": {
 		"node-fetch": "2.6.0",
-		"patch-package": "^6.2.2",
+		"patch-package": "6.2.2",
 		"snoowrap": "1.21.0",
 		"discord.js": "12.2.0",
 		"twitch-webhook": "1.2.4"
