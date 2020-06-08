@@ -23,12 +23,12 @@ const requestTwitchToken = (retry = true) => {
 			'grant_type': 'client_credentials'
 		}).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
 
-		fetch(`https://id.twitch.tv/oauth2/token?${qs}`, {'method': 'POST'}).then(processResponse).then(res => {
+		fetch(`https://id.twitch.tv/oauth2/token?${qs}`, {'method': 'POST'}).then(processResponse).then((res) => {
 			console.info('Twitch token acquired');
 			twitchAuth.token = res.access_token;
 			twitchAuth.lastValidation = Date.now();
 			resolve(twitchAuth.token);
-		}).catch(err => {
+		}).catch((err) => {
 			if(retry) {
 				console.error('Unable to acquire a Twitch token, trying again in 10 seconds:', err);
 				setTimeout(() => {
@@ -46,11 +46,11 @@ const getTwitchToken = () => {
 		const currentTimestamp = Date.now();
 		if(twitchAuth.token !== null) {
 			if(twitchAuth.lastValidation + 60 * 60 * 1000 < currentTimestamp) {
-				fetch(`https://id.twitch.tv/oauth2/validate`, {'headers': {'Authorization': `OAuth ${twitchAuth.token}`}}).then(res => {
+				fetch(`https://id.twitch.tv/oauth2/validate`, {'headers': {'Authorization': `OAuth ${twitchAuth.token}`}}).then((res) => {
 					console.info('Twitch token validated');
 					twitchAuth.lastValidation = currentTimestamp;
 					resolve(twitchAuth.token);
-				}).catch(err => {
+				}).catch((err) => {
 					console.info('Twitch token not valid, getting a new one');
 					resolve(requestTwitchToken());
 				});
@@ -96,7 +96,7 @@ const getTwitchStreamsStatus = (twitchUserIds, twitchToken) => {
 			'Client-ID': conf.twitch.clientId
 		}
 	}).then(processResponse).then((res) => {
-		for (const stream of res.data) twitchStreamsObj[stream.user_id] = true;
+		for(const stream of res.data) twitchStreamsObj[stream.user_id] = true;
 		return twitchStreamsObj;
 	});
 };
@@ -110,7 +110,7 @@ const updateSubredditHeaders = (twitchId, isStreamOnline) => {
 			Promise.all([fetch(`https://api.devwars.tv/schedules/latest?first=1`), subreddit.getSettings()]).then(([gamesReq, subredditSettings]) => {
 				processResponse(gamesReq).then((games) => {
 					let sidebar = subredditSettings.description.split(`[](#${subredditName.toLowerCase()})`);
-					if(sidebar.length != 3) throw new Error('Sidebar tag count mismatch');
+					if(sidebar.length !== 3) throw new Error('Sidebar tag count mismatch');
 
 					if(isStreamOnline) {
 						console.info(`Changing the header of /r/${subredditName} - ${twitchUser.display_name} is now live`);
@@ -135,13 +135,13 @@ const updateSubredditHeaders = (twitchId, isStreamOnline) => {
 						}
 					}
 
-					subreddit.editSettings({'description': sidebar.join(`[](#${subredditName.toLowerCase()})`)}).then().catch(err => {
+					subreddit.editSettings({'description': sidebar.join(`[](#${subredditName.toLowerCase()})`)}).then().catch((err) => {
 						console.error(`Unable to set settings of /r/${subredditName}:`, err);
 					});
-				}).catch(err => {
+				}).catch((err) => {
 					console.error(`Unable to get game info :`, err);
 				});
-			}).catch(err => {
+			}).catch((err) => {
 				console.error(`Unable to get game info or /r/${subredditName} settings:`, err);
 			});
 		}
@@ -192,7 +192,7 @@ const postSubredditPosts = (twitchId, twitchStream) => {
 
 			console.info(`Posting to /r/${subredditName} - ${twitchUser.display_name} is now live`);
 
-			r.getSubreddit(subredditName).submitLink({'title': title, 'url': `https://www.twitch.tv/${twitchUser.login}`, 'resubmit': true}).then().catch(err => {
+			r.getSubreddit(subredditName).submitLink({'title': title, 'url': `https://www.twitch.tv/${twitchUser.login}`, 'resubmit': true}).then().catch((err) => {
 				console.error(`Unable to post to /r/${subredditName}:`, err);
 			});
 		}
@@ -265,7 +265,7 @@ t.on('streams', ({options, headers, event}) => {
 
 	updateSubredditHeaders(options.user_id, isStreamOnline);
 
-	for (const receivedEvent of receivedEvents) {
+	for(const receivedEvent of receivedEvents) {
 		if(!receivedEvent.id || receivedEvent.type !== 'live' || processedStreams[receivedEvent.id]) continue;
 		processedStreams[receivedEvent.id] = true;
 
@@ -275,16 +275,16 @@ t.on('streams', ({options, headers, event}) => {
 });
 
 t.on('unsubscribe', (obj) => {
-	t.subscribe(obj['hub.topic']).then(() => {}).catch((err) => {
+	t.subscribe(obj['hub.topic']).then().catch((err) => {
 		console.error('Unable to resubscribe to a Twitch webhook topic:', err);
 		exit();
 	});
 });
 
 t.on('listening', () => {
-	for (const sig of ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'uncaughtException', 'SIGTERM']) process.on(sig, exit);
+	for(const sig of ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'uncaughtException', 'SIGTERM']) process.on(sig, exit);
 
-	for (const twitchId of Object.keys(conf.map)) {
+	for(const twitchId of Object.keys(conf.map)) {
 		t.subscribe('streams', {'user_id': twitchId}).then(() => {
 			updateSubredditHeaders(twitchId, twitchStreamStatuses[twitchId]);
 		}).catch((err) => {
@@ -306,7 +306,7 @@ d.on('error', (err) => {
 
 d.on('ready', () => {
 	console.info(`Logged in as ${d.user.tag}`);
-	t.listen().then(() => {}).catch((err) => {
+	t.listen().then().catch((err) => {
 		console.error('Unable to start listening to Twitch webhooks:', err);
 		exit();
 	});
@@ -319,7 +319,7 @@ requestTwitchToken(false).then((token) => {
 		twitchUserDetails = twitchUsers;
 		twitchStreamStatuses = twitchStreams;
 
-		d.login(conf.discordToken).then(() => {}).catch((err) => {
+		d.login(conf.discordToken).then().catch((err) => {
 			console.error('Unable to login to Discord:', err);
 			exit();
 		});
@@ -327,7 +327,7 @@ requestTwitchToken(false).then((token) => {
 		console.error('Unable to get Twitch info:', err);
 		exit();
 	});
-}).catch(err => {
+}).catch((err) => {
 	console.error(`Unable to acquire a Twitch token:`, err);
 	exit();
 });
