@@ -63,34 +63,48 @@ const getTwitchToken = () => {
 	});
 }
 
-const postInDiscordChannels = (twitchUser, twitchStream) => {
-	if(conf.map[twitchUser.id].discord) {
-		for(const channelConf of conf.map[twitchUser.id].discord) {
-			const channel = d.channels.cache.get(typeof channelConf === 'string' ? channelConf : channelConf.channel);
-			if(!channel) continue;
-
-			console.info(`Posting an embed to ${channel.id} - ${twitchUser.display_name} is now live`);
-
-			const embed = new djs.MessageEmbed()
-				.attachFiles(['./twitch.png'])
-				.setAuthor(`${twitchUser.display_name} is now streaming!`, twitchUser.profile_image_url)
-				.setTitle(twitchStream.title)
-				.setURL(`https://www.twitch.tv/${twitchUser.login}`)
-				// .setImage(twitchStream.thumbnail_url.replace('{width}', 480).replace('{height}', 270))
-				.setFooter('Twitch', 'attachment://twitch.png')
-				.setTimestamp(new Date(twitchStream.started_at))
-				.setColor(6570404);
-
-			channel.send((typeof channelConf !== 'string' && channelConf.message ? channelConf.message : ''), embed).then().catch((err) => {
-				console.error(`Unable to send a message to a Discord channel with ID ${channel.id}:`, err);
-			});
+const getTwitchUsersInfo = (twitchUserIds, twitchToken) => {
+	return fetch(`https://api.twitch.tv/helix/users?id=${twitchUserIds.join('&id=')}`, {
+		'headers': {
+			'Authorization': `Bearer ${twitchToken}`,
+			'Client-ID': conf.twitch.clientId
 		}
-	}
+	}).then(processResponse).then((res) => {
+		if(res.data.length === twitchUserIds.length) {
+			let twitchUsersObj = {};
+			for(const twitchUser of res.data) {
+				twitchUsersObj[twitchUser.id] = {
+					'display_name': twitchUser.display_name,
+					'login': twitchUser.login,
+					'profile_image_url': twitchUser.profile_image_url
+				};
+			}
+			return twitchUsersObj;
+		} else throw new Error(`Some or all of users ${twitchUserIds.join(', ')} not found`);
+	});
 };
 
-const updateSubredditHeaders = (twitchUser, isStreamOnline) => {
-	if(conf.map[twitchUser.id].redditHeader) {
-		for(const subredditName of conf.map[twitchUser.id].redditHeader) {
+const getTwitchStreamsStatus = (twitchUserIds, twitchToken) => {
+	let twitchStreamsObj = twitchUserIds.reduce((obj, id) => {
+		obj[id] = false;
+		return obj;
+	}, {});
+
+	return fetch(`https://api.twitch.tv/helix/streams?user_id=${twitchUserIds.join('&user_id=')}`, {
+		'headers': {
+			'Authorization': `Bearer ${twitchToken}`,
+			'Client-ID': conf.twitch.clientId
+		}
+	}).then(processResponse).then((res) => {
+		for (const stream of res.data) twitchStreamsObj[stream.user_id] = true;
+		return twitchStreamsObj;
+	});
+};
+
+const updateSubredditHeaders = (twitchId, isStreamOnline) => {
+	if(conf.map[twitchId].redditHeader) {
+		const twitchUser = twitchUserDetails[twitchId];
+		for(const subredditName of conf.map[twitchId].redditHeader) {
 			const subreddit = r.getSubreddit(subredditName);
 
 			Promise.all([fetch(`https://api.devwars.tv/schedules/latest?first=1`), subreddit.getSettings()]).then(([gamesReq, subredditSettings]) => {
@@ -134,14 +148,40 @@ const updateSubredditHeaders = (twitchUser, isStreamOnline) => {
 	}
 };
 
-const postSubredditPosts = (twitchUser, twitchStream) => {
-	if(conf.map[twitchUser.id].redditPost) {
-		for(const subredditConf of conf.map[twitchUser.id].redditPost) {
+const postInDiscordChannels = (twitchId, twitchStream) => {
+	if(conf.map[twitchId].discord) {
+		const twitchUser = twitchUserDetails[twitchId];
+		for(const channelConf of conf.map[twitchId].discord) {
+			const channel = d.channels.cache.get(typeof channelConf === 'string' ? channelConf : channelConf.channel);
+			if(!channel) continue;
+
+			console.info(`Posting an embed to ${channel.id} - ${twitchUser.display_name} is now live`);
+
+			const embed = new djs.MessageEmbed()
+				.attachFiles(['./twitch.png'])
+				.setAuthor(`${twitchUser.display_name} is now streaming!`, twitchUser.profile_image_url)
+				.setTitle(twitchStream.title)
+				.setURL(`https://www.twitch.tv/${twitchUser.login}`)
+				.setFooter('Twitch', 'attachment://twitch.png')
+				.setTimestamp(twitchStream.started_at)
+				.setColor(6570404);
+
+			channel.send((typeof channelConf !== 'string' && channelConf.message ? channelConf.message : ''), embed).then().catch((err) => {
+				console.error(`Unable to send a message to a Discord channel with ID ${channel.id}:`, err);
+			});
+		}
+	}
+};
+
+const postSubredditPosts = (twitchId, twitchStream) => {
+	if(conf.map[twitchId].redditPost) {
+		const twitchUser = twitchUserDetails[twitchId];
+		for(const subredditConf of conf.map[twitchId].redditPost) {
 			const subredditName = (typeof subredditConf === 'string' ? subredditConf : subredditConf.subreddit);
 			let title = '';
 
 			if(typeof subredditConf !== 'string' && subredditConf.title) {
-				const streamDate = new Date(twitchStream.started_at);
+				const streamDate = twitchStream.started_at;
 				title = subredditConf.title
 					.replace('{year}', streamDate.getUTCFullYear())
 					.replace('{month}', `${streamDate.getUTCMonth() < 9 ? '0' : ''}${streamDate.getUTCMonth() + 1}`)
@@ -159,7 +199,7 @@ const postSubredditPosts = (twitchUser, twitchStream) => {
 	}
 };
 
-const exitFunc = () => {
+const exit = () => {
 	t.unsubscribe('*');
 	d.destroy();
 	process.exit(0);
@@ -170,9 +210,13 @@ const exitFunc = () => {
 let twitchAuth = {
 	token: null,
 	lastValidation: null
-}
+};
+
+let twitchUserDetails = {};
+let twitchStreamStatuses = {};
 
 let processedNotifications = {};
+let processedStreams = {};
 
 // Reddit
 
@@ -199,60 +243,53 @@ const t = new (require('twitch-webhook'))({
 
 t.on('error', (err) => {
 	console.error('A twitch-webhook error occurred:', err);
-	exitFunc();
+	exit();
 });
 
 t.on('webhook-error', (err) => {
 	console.error('A twitch-webhook webhook error occurred:', err);
-	exitFunc();
+	exit();
 });
 
 t.on('denied', (err) => {
 	console.error('A twitch-webhook subscription denied error occurred:', err);
-	exitFunc();
+	exit();
 });
 
-t.on('streams', ({options, event}) => {
-	if(event.data.length === 0 || !processedNotifications[event.data[0].id]) {
-		// Get user details
-		getTwitchToken().then(token => {
-			return fetch(`https://api.twitch.tv/helix/users?id=${options.user_id}`, {
-				'headers': {
-					'Authorization': `Bearer ${token}`,
-					'Client-ID': conf.twitch.clientId
-				}
-			});
-		}).then(processResponse).then(twitchUser => {
-			if(twitchUser.data.length > 0) {
-				updateSubredditHeaders(twitchUser.data[0], (event.data.length > 0));
-				if(event.data.length > 0) {
-					processedNotifications[event.data[0].id] = true;
-					postInDiscordChannels(twitchUser.data[0], event.data[0]);
-					postSubredditPosts(twitchUser.data[0], event.data[0]);
-				}
-			} else {
-				throw new Error('User not found');
-			}
-		}).catch(err => {
-			console.error(`Unable to get details of a Twitch user with ID ${options.user_id}:`, err);
-		});
+t.on('streams', ({options, headers, event}) => {
+	if(!headers['twitch-notification-id'] || processedNotifications[headers['twitch-notification-id']]) return;
+	processedNotifications[headers['twitch-notification-id']] = true;
+
+	const isStreamOnline = (event.data.length > 0);
+	const receivedEvents = (isStreamOnline ? event.data.sort((a, b) => a.started_at - b.started_at) : []);
+
+	updateSubredditHeaders(options.user_id, isStreamOnline);
+
+	for (const receivedEvent of receivedEvents) {
+		if(!receivedEvent.id || receivedEvent.type !== 'live' || processedStreams[receivedEvent.id]) continue;
+		processedStreams[receivedEvent.id] = true;
+
+		postInDiscordChannels(options.user_id, receivedEvent);
+		postSubredditPosts(options.user_id, receivedEvent);
 	}
 });
 
 t.on('unsubscribe', (obj) => {
 	t.subscribe(obj['hub.topic']).then(() => {}).catch((err) => {
 		console.error('Unable to resubscribe to a Twitch webhook topic:', err);
-		exitFunc();
+		exit();
 	});
 });
 
 t.on('listening', () => {
-	for (const sig of ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'uncaughtException', 'SIGTERM']) process.on(sig, exitFunc);
+	for (const sig of ['exit', 'SIGINT', 'SIGUSR1', 'SIGUSR2', 'uncaughtException', 'SIGTERM']) process.on(sig, exit);
 
 	for (const twitchId of Object.keys(conf.map)) {
-		t.subscribe('streams', {'user_id': twitchId}).then(() => {}).catch((err) => {
+		t.subscribe('streams', {'user_id': twitchId}).then(() => {
+			updateSubredditHeaders(twitchId, twitchStreamStatuses[twitchId]);
+		}).catch((err) => {
 			console.error('Unable to subscribe to a Twitch webhook topic:', err);
-			exitFunc();
+			exit();
 		});
 	}
 
@@ -271,16 +308,26 @@ d.on('ready', () => {
 	console.info(`Logged in as ${d.user.tag}`);
 	t.listen().then(() => {}).catch((err) => {
 		console.error('Unable to start listening to Twitch webhooks:', err);
-		d.destroy();
+		exit();
 	});
 });
 
-// Everything is set up, let's start by getting a token from Twitch and logging in to Discord
+// Everything is set up, let's start
 
-requestTwitchToken(false).then(() => {
-	d.login(conf.discordToken).then(() => {}).catch((err) => {
-		console.error('Unable to login to Discord:', err);
+requestTwitchToken(false).then((token) => {
+	Promise.all([getTwitchUsersInfo(Object.keys(conf.map), token), getTwitchStreamsStatus(Object.keys(conf.map), token)]).then(([twitchUsers, twitchStreams]) => {
+		twitchUserDetails = twitchUsers;
+		twitchStreamStatuses = twitchStreams;
+
+		d.login(conf.discordToken).then(() => {}).catch((err) => {
+			console.error('Unable to login to Discord:', err);
+			exit();
+		});
+	}).catch((err) => {
+		console.error('Unable to get Twitch info:', err);
+		exit();
 	});
 }).catch(err => {
 	console.error(`Unable to acquire a Twitch token:`, err);
+	exit();
 });
