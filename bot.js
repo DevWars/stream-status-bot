@@ -257,6 +257,7 @@ t.on('denied', (err) => {
 });
 
 t.on('streams', ({options, headers, event}) => {
+	console.debug(headers['twitch-notification-id'], processedNotifications);
 	if(!headers['twitch-notification-id'] || processedNotifications[headers['twitch-notification-id']]) return;
 	processedNotifications[headers['twitch-notification-id']] = true;
 
@@ -266,6 +267,7 @@ t.on('streams', ({options, headers, event}) => {
 	updateSubredditHeaders(options.user_id, isStreamOnline);
 
 	for(const receivedEvent of receivedEvents) {
+		console.debug(receivedEvent.id, processedStreams);
 		if(!receivedEvent.id || receivedEvent.type !== 'live' || processedStreams[receivedEvent.id]) continue;
 		processedStreams[receivedEvent.id] = true;
 

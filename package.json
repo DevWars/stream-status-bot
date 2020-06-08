@@ -1,6 +1,6 @@
 {
 	"name": "devwars-stream-status-bot",
-	"version": "1.6.0",
+	"version": "1.6.1",
 	"description": "A reddit and Discord stream status bot for DevWars",
 	"keywords": [
 		"devwars",
