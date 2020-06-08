@@ -257,7 +257,7 @@ t.on('denied', (err) => {
 });
 
 t.on('streams', ({options, event}) => {
-	// We ignore notification IDs, because they're not very reliable (sometimes, we got the same notif. ID for different streams).
+	// We ignore notification IDs, because they're not very reliable (sometimes, we get the same notif. ID for different streams).
 	// Notifying only once per stream and checking that the new stream started later than those we received before should be enough.
 	const isStreamOnline = (event.data.length > 0);
 	const receivedEvents = (isStreamOnline ? event.data.sort((a, b) => a.started_at - b.started_at) : []);
@@ -265,8 +265,6 @@ t.on('streams', ({options, event}) => {
 	updateSubredditHeaders(options.user_id, isStreamOnline);
 
 	for(const receivedEvent of receivedEvents) {
-		console.debug(receivedEvent.id, processedStreams);
-		console.debug(receivedEvent.started_at, latestStreams);
 		if(
 			!receivedEvent.id ||
 			receivedEvent.type !== 'live' ||
