@@ -10,6 +10,8 @@ Run a Docker image from [Docker Hub](https://hub.docker.com/r/devwars/stream-sta
 
 ## Changelog
 
+8\. 6. 2020 - 1.6.2 - fixed notification deduplication logic
+
 8\. 6. 2020 - 1.6.1 - debugging
 
 8\. 6. 2020 - 1.6.0 - various stability and sanity check improvements

@@ -215,8 +215,8 @@ let twitchAuth = {
 let twitchUserDetails = {};
 let twitchStreamStatuses = {};
 
-let processedNotifications = {};
 let processedStreams = {};
+let latestStreams = {};
 
 // Reddit
 
@@ -256,11 +256,9 @@ t.on('denied', (err) => {
 	exit();
 });
 
-t.on('streams', ({options, headers, event}) => {
-	console.debug(headers['twitch-notification-id'], processedNotifications);
-	if(!headers['twitch-notification-id'] || processedNotifications[headers['twitch-notification-id']]) return;
-	processedNotifications[headers['twitch-notification-id']] = true;
-
+t.on('streams', ({options, event}) => {
+	// We ignore notification IDs, because they're not very reliable (sometimes, we got the same notif. ID for different streams).
+	// Notifying only once per stream and checking that the new stream started later than those we received before should be enough.
 	const isStreamOnline = (event.data.length > 0);
 	const receivedEvents = (isStreamOnline ? event.data.sort((a, b) => a.started_at - b.started_at) : []);
 
@@ -268,8 +266,16 @@ t.on('streams', ({options, headers, event}) => {
 
 	for(const receivedEvent of receivedEvents) {
 		console.debug(receivedEvent.id, processedStreams);
-		if(!receivedEvent.id || receivedEvent.type !== 'live' || processedStreams[receivedEvent.id]) continue;
+		console.debug(receivedEvent.started_at, latestStreams);
+		if(
+			!receivedEvent.id ||
+			receivedEvent.type !== 'live' ||
+			processedStreams[receivedEvent.id] ||
+			(latestStreams[options.user_id] && receivedEvent.started_at < latestStreams[options.user_id])
+		) continue;
+
 		processedStreams[receivedEvent.id] = true;
+		latestStreams[options.user_id] = receivedEvent.started_at;
 
 		postInDiscordChannels(options.user_id, receivedEvent);
 		postSubredditPosts(options.user_id, receivedEvent);
