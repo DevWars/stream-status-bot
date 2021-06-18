@@ -107,7 +107,7 @@ const updateSubredditHeaders = (twitchId, isStreamOnline) => {
 		for(const subredditName of conf.map[twitchId].redditHeader) {
 			const subreddit = r.getSubreddit(subredditName);
 
-			Promise.all([fetch(`https://api.devwars.tv/schedules/latest?first=1`), subreddit.getSettings()]).then(([gamesReq, subredditSettings]) => {
+			Promise.all([fetch(`https://api.devwars.tv/games?status=scheduled&first=100`), subreddit.getSettings()]).then(([gamesReq, subredditSettings]) => {
 				processResponse(gamesReq).then((games) => {
 					let sidebar = subredditSettings.description.split(`[](#${subredditName.toLowerCase()})`);
 					if(sidebar.length !== 3) throw new Error('Sidebar tag count mismatch');
@@ -122,13 +122,12 @@ const updateSubredditHeaders = (twitchId, isStreamOnline) => {
 						let game = null;
 						let d;
 
-						if(Array.isArray(games) && games[0].startTime) {
-							game = games[0];
-						} else if(typeof games === 'object' && games.startTime) {
-							game = games;
+						if(Array.isArray(games.data)) {
+							games.data.sort((a, b) => Date.parse(a.startTime) - Date.parse(b.startTime));
+							game = games.data[0];
 						}
 
-						if(game !== null && (d = new Date(game.startTime)) > new Date() && game.status === 0) {
+						if(game !== null) {
 							sidebar[1] += `*${days[d.getUTCDay()]}, ${months[d.getUTCMonth()]} ${d.getUTCDate()} - ${d.getUTCHours()}:${d.getUTCMinutes() < 10 ? '0' : ''}${d.getUTCMinutes()} UTC*`;
 						} else {
 							sidebar[1] += '*No upcoming games scheduled*';
@@ -139,7 +138,7 @@ const updateSubredditHeaders = (twitchId, isStreamOnline) => {
 						console.error(`Unable to set settings of /r/${subredditName}:`, err);
 					});
 				}).catch((err) => {
-					console.error(`Unable to get game info :`, err);
+					console.error(`Unable to get game info:`, err);
 				});
 			}).catch((err) => {
 				console.error(`Unable to get game info or /r/${subredditName} settings:`, err);
