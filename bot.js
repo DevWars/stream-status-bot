@@ -120,7 +120,6 @@ const updateSubredditHeaders = (twitchId, isStreamOnline) => {
 						sidebar[1] = '**Next DevWars:**[](#linebreak) ';
 
 						let game = null;
-						let d;
 
 						if(Array.isArray(games.data)) {
 							games.data.sort((a, b) => Date.parse(a.startTime) - Date.parse(b.startTime));
@@ -128,6 +127,7 @@ const updateSubredditHeaders = (twitchId, isStreamOnline) => {
 						}
 
 						if(game !== null) {
+							let d = new Date(game.startTime);
 							sidebar[1] += `*${days[d.getUTCDay()]}, ${months[d.getUTCMonth()]} ${d.getUTCDate()} - ${d.getUTCHours()}:${d.getUTCMinutes() < 10 ? '0' : ''}${d.getUTCMinutes()} UTC*`;
 						} else {
 							sidebar[1] += '*No upcoming games scheduled*';
