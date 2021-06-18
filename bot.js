@@ -121,7 +121,7 @@ const updateSubredditHeaders = (twitchId, isStreamOnline) => {
 
 						let game = null;
 
-						if(Array.isArray(games.data)) {
+						if(Array.isArray(games.data) && games.data.length > 0) {
 							games.data.sort((a, b) => Date.parse(a.startTime) - Date.parse(b.startTime));
 							game = games.data[0];
 						}
