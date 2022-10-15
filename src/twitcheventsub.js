@@ -166,15 +166,15 @@ export default class TwitchEventSub {
 							_self.twitch.streamInfo = await _self.twitch.getStreamInfo();
 
 							// Check if we have a stream title
-							const twitchLogin = 'danvq'; // data.event.broadcaster_user_login
+							const twitchLogin = data.event.broadcaster_user_login;
 
-							/*if (_self.twitch.streamInfo[twitchLogin].title === null) {
+							if (_self.twitch.streamInfo[twitchLogin].title === null) {
 								throw new StreamStatusBotError(`No stream title available for Twitch channel ${twitchLogin}, which we received a stream.online event for`);
-							}*/
+							}
 
 							// Call the stream online handler
 							_self.onStreamOnline(_self.twitch.userInfo[twitchLogin], {
-								'title': 'Stream title', // _self.twitch.streamInfo[twitchLogin].title
+								'title': _self.twitch.streamInfo[twitchLogin].title,
 								'started_at': new Date(data.event.started_at),
 							});
 						} else {
@@ -184,7 +184,7 @@ export default class TwitchEventSub {
 
 					case 'stream.offline':
 						// Call the stream offline handler
-						_self.onStreamOffline(_self.twitch.userInfo['danvq']); // data.event.broadcaster_user_login
+						_self.onStreamOffline(_self.twitch.userInfo[data.event.broadcaster_user_login]);
 						break;
 
 					default:
