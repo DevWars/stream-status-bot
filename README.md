@@ -9,5 +9,4 @@ When a new tag is created, the current state of this repo gets published to NPM 
 Run a Docker image from [Docker Hub](https://hub.docker.com/r/devwars/stream-status-bot/tags) with a config file mounted to `/node/config.json`.
 
 ## License
-
 GPL v3

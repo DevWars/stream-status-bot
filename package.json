@@ -1,6 +1,6 @@
 {
 	"name": "devwars-stream-status-bot",
-	"version": "1.7.2",
+	"version": "2.0.0",
 	"description": "A reddit and Discord stream status bot for DevWars",
 	"keywords": [
 		"devwars",
@@ -13,7 +13,7 @@
 	"homepage": "https://github.com/DevWars/stream-status-bot",
 	"author": {
 		"name": "Daniel Peukert",
-		"email": "dan.peukert@gmail.com",
+		"email": "daniel@peukert.cc",
 		"url": "https://www.danielpeukert.cz"
 	},
 	"repository": {
@@ -21,20 +21,18 @@
 		"url": "https://github.com/DevWars/stream-status-bot"
 	},
 	"bugs": {
-		"email": "dan.peukert@gmail.com",
+		"email": "daniel@peukert.cc",
 		"url": "https://github.com/DevWars/stream-status-bot/issues"
 	},
-	"main": "./bot.js",
 	"scripts": {
-		"postinstall": "patch-package",
-		"start": "node bot.js"
+		"start": "node src/index.js"
 	},
 	"dependencies": {
-		"node-fetch": "2.6.1",
-		"patch-package": "6.4.7",
+		"node-fetch": "3.2.10",
+		"express": "4.18.2",
 		"snoowrap": "1.23.0",
-		"discord.js": "12.5.3",
-		"twitch-webhook": "1.2.4"
+		"discord.js": "14.6.0"
 	},
-	"license": "GPL-3.0"
+	"license": "GPL-3.0",
+	"type": "module"
 }

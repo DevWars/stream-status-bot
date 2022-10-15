@@ -1,4 +1,5 @@
 {
+	"debug": false,
 	"reddit": {
 		"username": "RedditUsername",
 		"password": "RedditPassword",
@@ -7,16 +8,19 @@
 	},
 	"twitch": {
 		"clientId": "aBcDeFgHiJkLmNoPqRsTuVwXyZ1234",
+		"secret": "aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890"
+	},
+	"twitchEventSub": {
 		"callback": "https://twitchwebhooks.example.com",
-		"secret": "aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890",
-		"port": 80
+		"port": 80,
+		"secret": "aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890"
 	},
 	"discordToken": "aBcDeFgHiJkLmNoPqRsTuVwXyZ1234567890aBcDeFgHiJkLmNoPqRsTuVw",
 	"map": {
-		"75552478": {
-			"discord": [ "112233445566778899" ]
+		"syntag": {
+			"discord": ["112233445566778899"]
 		},
-		"77543873": {
+		"devwars": {
 			"discord": [
 				"112233445566778899",
 				{
@@ -24,7 +28,7 @@
 					"message": "@here"
 				}
 			],
-			"redditHeader": [ "DevWars" ],
+			"redditHeader": ["DevWars"],
 			"redditPost": [
 				"DevWars",
 				{

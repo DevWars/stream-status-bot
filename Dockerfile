@@ -1,4 +1,4 @@
-FROM node:alpine
+FROM node:18.11.0-alpine
 ENV NODE_ENV=production
 WORKDIR /node
 RUN echo 'unsafe-perm = true' > /node/.npmrc
