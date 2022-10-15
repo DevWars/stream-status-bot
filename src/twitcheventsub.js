@@ -41,12 +41,12 @@ export default class TwitchEventSub {
 		this.server = this.express.listen(config.twitchEventSub.port);
 
 		// Subscribe to the events we want to be subscribed to
-		// this.subscribe();
+		this.subscribe();
 	}
 
 	destroy() {
 		// Unsubscribe from all events
-		// this.unsubscribe();
+		this.unsubscribe();
 
 		// If an instance of http.Server is running, close it
 		if (this.server !== null) {
