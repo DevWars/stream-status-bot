@@ -147,7 +147,7 @@ export default class Twitch {
 			// Store information for each stream under their user logins
 			for (const stream of res.data) {
 				streamInfo[stream.user_login] = {
-					'title': res.title,
+					'title': stream.title || null,
 					'online': true,
 				};
 			}
