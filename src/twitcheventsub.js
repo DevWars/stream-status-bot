@@ -94,7 +94,7 @@ export default class TwitchEventSub {
 				this.subscriptionIds.push(response.data[0].id);
 			}
 
-			console.info(`Listening for online status changes of ${res.length} Twitch channels`);
+			console.info(`Listening for online status changes of ${res.length / 2} Twitch channels`);
 		}).catch((err) => {
 			throw new StreamStatusBotError('Unable to subscribe to Twitch channel online status changes', err);
 		});
@@ -198,7 +198,7 @@ export default class TwitchEventSub {
 				// We're responding to a verification, just send the challenge string back as a text/plain with a 200
 				res.set('Content-Type', 'text/plain');
 				res.status(200).send(data.challenge);
-				console.info(`Twitch verification received, challenge string sent`);
+				console.info(`Twitch verification request for subscription ${data.subscription.id} received, challenge string sent`);
 				break;
 
 			case 'revocation':
