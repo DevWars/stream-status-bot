@@ -5,7 +5,7 @@ import {createHmac, timingSafeEqual} from 'crypto';
 import Express from 'express';
 import fetch from 'node-fetch';
 
-import {processJsonResponse, StreamStatusBotError} from './util.js';
+import {processJsonResponse, closeServerPromise, StreamStatusBotError} from './util.js';
 
 import config from '../config.json' assert {'type': 'json'};
 
@@ -17,8 +17,7 @@ export default class TwitchEventSub {
 		this.express = null;
 		this.server = null;
 
-		// Prepare helper variables to store subscription IDs and already processed notifications
-		this.subscriptionIds = [];
+		// Prepare helper variable to store already processed notifications
 		this.processedNotifications = {};
 
 		// Prepare default stream online and offline handlers
@@ -26,7 +25,7 @@ export default class TwitchEventSub {
 		this.onStreamOffline = (twitchUser) => {};
 	}
 
-	init() {
+	async init() {
 		// Set up an Express instance
 		this.express = Express();
 
@@ -40,17 +39,20 @@ export default class TwitchEventSub {
 
 		this.server = this.express.listen(config.twitchEventSub.port);
 
+		// Unsubscribe from any event subscriptions that might still be running
+		await this.unsubscribe();
+
 		// Subscribe to the events we want to be subscribed to
-		this.subscribe();
+		await this.subscribe();
 	}
 
-	destroy() {
+	async destroy() {
 		// Unsubscribe from all events
-		this.unsubscribe();
+		await this.unsubscribe();
 
 		// If an instance of http.Server is running, close it
 		if (this.server !== null) {
-			this.server.close()
+			await closeServerPromise(this.server);
 		}
 	}
 
@@ -88,12 +90,7 @@ export default class TwitchEventSub {
 		}
 
 		// Send the event subscription requests
-		Promise.all(promises).then((res) => {
-			// Store the subscription IDs to be used when unsubscribing
-			for (const response of res) {
-				this.subscriptionIds.push(response.data[0].id);
-			}
-
+		return Promise.all(promises).then((res) => {
 			console.info(`Listening for online status changes of ${res.length / 2} Twitch channels`);
 		}).catch((err) => {
 			throw new StreamStatusBotError('Unable to subscribe to Twitch channel online status changes', err);
@@ -101,22 +98,36 @@ export default class TwitchEventSub {
 	}
 
 	async unsubscribe () {
-		let promises = [];
+		// Get currently existing subscriptions
+		return fetch('https://api.twitch.tv/helix/eventsub/subscriptions', {
+			'headers': {
+				'Authorization': `Bearer ${await this.twitch.getToken()}`,
+				'Client-ID': config.twitch.clientId,
+			}
+		}).then(processJsonResponse).then(async (res) => {
+			if (res.data.length > 0) {
+				// Loop through each subscription and create a unsubscribe request for it
+				let promises = [];
 
-		// Loop through each subscription and create a unsubscribe request for it
-		for (const subscriptionId of this.subscriptionIds) {
-			promises.push(fetch(`https://api.twitch.tv/helix/eventsub/subscriptions?id=${subscriptionId}`, {
-				'method': 'DELETE',
-				'headers': {
-					'Authorization': `Bearer ${await this.twitch.getToken()}`,
-					'Client-ID': config.twitch.clientId,
-				},
-			}));
-		}
+				for (const subscription of res.data) {
+					promises.push(fetch(`https://api.twitch.tv/helix/eventsub/subscriptions?id=${subscription.id}`, {
+						'method': 'DELETE',
+						'headers': {
+							'Authorization': `Bearer ${await this.twitch.getToken()}`,
+							'Client-ID': config.twitch.clientId,
+						},
+					}));
+				}
 
-		// Send the unsubscribe requests
-		Promise.all(promises).then((res) => {
-			console.info(`Unsubscribed from online status changes of ${res.length} Twitch channels`);
+				// Send the unsubscribe requests
+				return Promise.all(promises);
+			} else {
+				return Promise.resolve([]);
+			}
+		}).then((res) => {
+			if (res.length > 0) {
+				console.info(`Unsubscribed from ${res.length} Twitch channel online status change subscriptions`);
+			}
 		}).catch((err) => {
 			console.error('Unable to unsubscribe from Twitch channel online status changes');
 			console.error(err);

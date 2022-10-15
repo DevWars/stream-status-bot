@@ -39,6 +39,8 @@ export default class Twitch {
 				console.error('Unable to revoke Twitch OAuth access token');
 				console.error(err);
 			});
+		} else {
+			return null;
 		}
 	}
 

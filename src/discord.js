@@ -41,6 +41,7 @@ export default class Discord {
 	destroy() {
 		// Get rid of our discord.js instance
 		this.discord.destroy();
+		return null;
 	}
 
 	// Handle posting

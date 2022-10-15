@@ -30,6 +30,7 @@ export default class Reddit {
 
 	destroy() {
 		this.snoowrap = null;
+		return null;
 	}
 
 	// Handle header editing

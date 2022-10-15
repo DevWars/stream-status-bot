@@ -14,6 +14,18 @@ export const processJsonResponse = (res) => {
 	});
 };
 
+export const closeServerPromise = (server) => {
+	return new Promise((resolve, reject) => {
+		server.close((error) => {
+			if (!error) {
+				resolve();
+			} else {
+				reject(error);
+			}
+		});
+	});
+};
+
 export class StreamStatusBotError extends Error {
 	constructor(message, exception) {
 		super(message);

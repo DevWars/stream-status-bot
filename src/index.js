@@ -12,25 +12,25 @@ const twitch = new Twitch();
 const twitcheventsub = new TwitchEventSub(twitch);
 
 // Lifecycle management
-let shutdownHandlerCalled = false;
+let shutdownStarted = false;
 
 const shutdownHandler = async (error) => {
-	if (shutdownHandlerCalled === false) {
-		shutdownHandlerCalled = true;
-
-		if (typeof error !== 'string') {
-			if (error instanceof StreamStatusBotError) {
-				console.error(`ERROR: ${error.message}`);
-				if (error.exception) {
-					console.error(error.exception);
-				}
-			} else {
-				console.error(`UNEXPECTED ERROR: ${error.name}: ${error.message}`);
-				if (error.stack) {
-					console.error(error.stack);
-				}
+	if (typeof error !== 'string') {
+		if (error instanceof StreamStatusBotError) {
+			console.error(`ERROR: ${error.message}`);
+			if (error.exception) {
+				console.error(error.exception);
+			}
+		} else {
+			console.error(`UNEXPECTED ERROR: ${error.name}: ${error.message}`);
+			if (error.stack) {
+				console.error(error.stack);
 			}
 		}
+	}
+
+	if (shutdownStarted === false) {
+		shutdownStarted = true;
 
 		await twitcheventsub.destroy()
 		await twitch.destroy();
