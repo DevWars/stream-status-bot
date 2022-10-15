@@ -172,7 +172,7 @@ export default class TwitchEventSub {
 						this.latestStreams[twitchLogin] = 0;
 					}
 
-					if (this.processedStreams[twitchLogin][receivedEvent.id] || streamStartedAt < this.latestStreams[twitchLogin]) {
+					if (this.processedStreams[twitchLogin][streamId] || streamStartedAt < this.latestStreams[twitchLogin]) {
 						console.info('This Twitch event has already been processed, ignoring');
 						break;
 					}
