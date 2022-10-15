@@ -17,8 +17,9 @@ export default class TwitchEventSub {
 		this.express = null;
 		this.server = null;
 
-		// Prepare helper variable to store already processed notifications
-		this.processedNotifications = {};
+		// Prepare helper variables for deduplicating notifications
+		this.processedStreams = {};
+		this.latestStreams = {};
 
 		// Prepare default stream online and offline handlers
 		this.onStreamOnline = (twitchUser, twitchStream) => {};
@@ -140,9 +141,9 @@ export default class TwitchEventSub {
 		const message = req.headers['twitch-eventsub-message-id'] + req.headers['twitch-eventsub-message-timestamp'] + req.body;
 		const hmac = 'sha256=' + createHmac('sha256', config.twitchEventSub.secret).update(message).digest('hex');
 
-		if (!timingSafeEqual(Buffer.from(hmac), Buffer.from(req.headers['twitch-eventsub-message-signature']))) {
+		if (!req.headers['twitch-eventsub-message-signature'] || !timingSafeEqual(Buffer.from(hmac), Buffer.from(req.headers['twitch-eventsub-message-signature']))) {
 			res.sendStatus(403);
-			console.info(`Message with an invalid HMAC signature received, ignoring`);
+			console.info(`Message with no or an invalid HMAC signature received, ignoring`);
 			return;
 		}
 
@@ -155,15 +156,30 @@ export default class TwitchEventSub {
 				// We're working with a regular event notification, first return a 204
 				res.sendStatus(204);
 
-				// Check if we're working with an event we've already processed, if we are, skip it, if not, save it
-				const eventId = data.subscription.id;
+				// Check if we want to process this notification. We ignore notification IDs, because they're not very reliable
+				// (sometimes, we get the same ID for different streams). Notifying only once per stream and checking that
+				// the new stream started later than those we received before should be enough.
+				const streamId = data.event.id || null;
+				const streamStartedAt = data.event.started_at || null;
+				const twitchLogin = data.event.broadcaster_user_login || null;
 
-				if (_self.processedNotifications[eventId]) {
-					console.info(`Event ${eventId} has already been processed, ignoring`);
-					break;
+				if (streamId !== null && streamStartedAt !== null && twitchLogin  !== null) {
+					if (!this.processedStreams[twitchLogin]) {
+						this.processedStreams[twitchLogin] = [];
+					}
+
+					if (!this.latestStreams[twitchLogin]) {
+						this.latestStreams[twitchLogin] = 0;
+					}
+
+					if (this.processedStreams[twitchLogin][receivedEvent.id] || streamStartedAt < this.latestStreams[twitchLogin]) {
+						console.info('This Twitch event has already been processed, ignoring');
+						break;
+					}
+
+					this.processedStreams[twitchLogin][streamId] = true;
+					this.latestStreams[twitchLogin] = streamStartedAt;
 				}
-
-				_self.processedNotifications[eventId] = true;
 
 				// Check which event type we're working with and handle it accordingly
 				const eventType = data.subscription.type;
@@ -177,8 +193,6 @@ export default class TwitchEventSub {
 							_self.twitch.streamInfo = await _self.twitch.getStreamInfo();
 
 							// Check if we have a stream title
-							const twitchLogin = data.event.broadcaster_user_login;
-
 							if (_self.twitch.streamInfo[twitchLogin].title === null) {
 								throw new StreamStatusBotError(`No stream title available for Twitch channel ${twitchLogin}, which we received a stream.online event for`);
 							}
@@ -195,7 +209,7 @@ export default class TwitchEventSub {
 
 					case 'stream.offline':
 						// Call the stream offline handler
-						_self.onStreamOffline(_self.twitch.userInfo[data.event.broadcaster_user_login]);
+						_self.onStreamOffline(_self.twitch.userInfo[twitchLogin]);
 						break;
 
 					default:
