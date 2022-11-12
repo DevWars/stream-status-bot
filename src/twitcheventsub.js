@@ -34,6 +34,10 @@ export default class TwitchEventSub {
 			'type': 'application/json'
 		}));
 
+		this.express.get('/health', (req, res) => {
+			res.status(200).send('OK');
+		});
+
 		this.express.post('/', (req, res) => {
 			this.eventHandler(req, res, this);
 		});
