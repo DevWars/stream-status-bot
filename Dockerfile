@@ -8,4 +8,4 @@ COPY twitch.png /node/
 ADD src/ /node/src/
 CMD npm start
 EXPOSE 80
-HEALTHCHECK --interval=60s --timeout=10s CMD curl --fail http://localhost:80/health/ || exit 1
+HEALTHCHECK --interval=60s --timeout=10s CMD wget --tries=1 --spider http://localhost:80/health/ || exit 1
