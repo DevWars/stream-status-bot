@@ -38,6 +38,10 @@ export default class TwitchEventSub {
 			res.status(200).send('OK');
 		});
 
+		this.express.get('/robots.txt', (req, res) => {
+			res.status(200).send('User-agent: *\nDisallow: /');
+		});
+
 		this.express.post('/', (req, res) => {
 			this.eventHandler(req, res, this);
 		});
