@@ -32,7 +32,7 @@ const shutdownHandler = async (error) => {
 	if (shutdownStarted === false) {
 		shutdownStarted = true;
 
-		await twitcheventsub.destroy()
+		await twitcheventsub.destroy();
 		await twitch.destroy();
 		await reddit.destroy();
 		await discord.destroy();
