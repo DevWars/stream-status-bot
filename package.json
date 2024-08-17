@@ -11,17 +11,12 @@
 		"discord"
 	],
 	"homepage": "https://github.com/DevWars/stream-status-bot",
-	"author": {
-		"name": "Daniel Peukert",
-		"email": "daniel@peukert.cc",
-		"url": "https://www.danielpeukert.cz"
-	},
+	"author": "Daniel Peukert",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/DevWars/stream-status-bot"
 	},
 	"bugs": {
-		"email": "daniel@peukert.cc",
 		"url": "https://github.com/DevWars/stream-status-bot/issues"
 	},
 	"scripts": {
